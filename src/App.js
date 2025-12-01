@@ -165,6 +165,9 @@ import KachaInvoiceTable from "./Component/Panels/Admin/KachaSales/KachaInvoiceT
 import KachaInvoicePDFPreview from "./Component/Panels/Admin/KachaSales/KachaInvoicePDFPreview";
 import Period from "./Component/Panels/Admin/Period/Period";
 import PlaceSalesOrder from "./Component/Panels/Staff/StaffPages/PlaceOrder/PlaceSalesOrder";
+import Cart from "./Component/Panels/Staff/StaffPages/Cart/Cart"
+import CheckoutPage from "./Component/Panels/Staff/StaffPages/CheckOut/CheckOut";
+import OrderSuccess from "./Component/Panels/Staff/StaffPages/OrderPlaced/OrderPlace";
 
 
 
@@ -206,7 +209,10 @@ function App() {
         <Route path="/staff/add-expense" element={<AddExpense />} />
         <Route path="/staff/offers" element={<StaffOffers />} />
         <Route path="/staff/place-sales-order" element={<PlaceSalesOrder />} />
-           
+           <Route path="/staff/cart" element={<Cart/>} />
+           // In your routes configuration
+          <Route path="/staff/checkout" element={<CheckoutPage />} />
+          <Route path="/staff/order-success" element={<OrderSuccess />} />
 
         {/* Admin  Pages */}
         

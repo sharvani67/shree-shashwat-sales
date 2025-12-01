@@ -59,11 +59,15 @@ function MyRetailers() {
 
   const handleAddRetailer = () => navigate("/staff/add-retailer");
 
-  const handlePlaceOrder = (retailerId,discount) => {
-    navigate("/staff/place-sales-order", { 
-      state: { retailerId,discount } 
-    });
-  };
+  const handlePlaceOrder = (retailerId, discount, retailerName) => {
+  navigate("/staff/place-sales-order", { 
+    state: { 
+      retailerId, 
+      discount,
+      customerName: retailerName 
+    } 
+  });
+};
 
   return (
     <StaffMobileLayout>
@@ -122,7 +126,7 @@ function MyRetailers() {
                   <h3>{retailer.name}</h3>
                   <button 
                     className="place-order-btn"
-                    onClick={() => handlePlaceOrder(retailer.id,retailer.discount)}
+                    onClick={() => handlePlaceOrder(retailer.id,retailer.discount, retailer.name)}
                   >
                     Place Order
                   </button>

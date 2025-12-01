@@ -460,3 +460,200 @@
     position: static;
   }
 }
+
+
+/* New styles for cart integration */
+
+/* Header with Cart */
+.staff-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.staff-cart-btn {
+  /* background: #4a90e2; */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+  font-weight: 500;
+  position: relative;
+}
+
+.staff-cart-count {
+  background: #ff7043;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+}
+
+/* Retailer Info Bar */
+.retailer-info-bar {
+  display: flex;
+  gap: 24px;
+  background: #f0f7ff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #2c5282;
+}
+
+.discount-badge {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+/* Cart Summary Sidebar */
+.staff-cart-summary {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.staff-cart-summary h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.empty-cart-summary {
+  text-align: center;
+  padding: 20px 0;
+  color: #666;
+}
+
+.cart-summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-qty {
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+}
+
+.more-items {
+  text-align: center;
+  padding: 8px;
+  color: #666;
+  font-size: 13px;
+  font-style: italic;
+  border-top: 1px dashed #ddd;
+  margin-top: 8px;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 2px solid #f0f0f0;
+  border-bottom: 2px solid #f0f0f0;
+  margin: 16px 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.view-cart-btn {
+  display: block;
+  text-align: center;
+  background: #4caf50;
+  color: white;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.view-cart-btn:hover {
+  background: #388e3c;
+}
+
+/* Product Stock Info */
+.product-stock-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.stock-indicator {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Responsive layout for order content */
+@media (min-width: 768px) {
+  .staff-order-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .staff-order-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .retailer-info-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
