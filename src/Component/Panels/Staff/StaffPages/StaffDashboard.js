@@ -1,6 +1,7 @@
 import React from "react";
 import StaffMobileLayout from "../../Staff/StaffPages/StaffMobileLayout/StaffMobileLayout";
 import "./StaffDashboard.css";
+import { Link } from "react-router-dom";
 
 function StaffDashboard() {
   return (
@@ -41,7 +42,7 @@ function StaffDashboard() {
           </div>
 
           {/* Recent Activity Section */}
-          <div className="recent-activity">
+          {/* <div className="recent-activity">
             <h2>Recent Activity</h2>
             <p className="section-subtitle">Latest updates from your network</p>
             
@@ -70,39 +71,43 @@ function StaffDashboard() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          {/* Quick Actions Section */}
-          <div className="quick-actions">
-            <h2>Quick Actions</h2>
-            <p className="section-subtitle">Common tasks and shortcuts</p>
-            
-            <div className="action-cards">
-              <div className="action-card">
-                <div className="action-icon">📊</div>
-                <div className="action-content">
-                  <h3>Log Sales Visit</h3>
-                  <p>Record your latest retailer visit</p>
-                </div>
-              </div>
+         
 
-              <div className="action-card">
-                <div className="action-icon">💰</div>
-                <div className="action-content">
-                  <h3>Submit Expense</h3>
-                  <p>Add your daily expenses</p>
-                </div>
-              </div>
+<div className="quick-actions">
+  <h2>Quick Actions</h2>
+  <p className="section-subtitle">Common tasks and shortcuts</p>
 
-              <div className="action-card">
-                <div className="action-icon">🏪</div>
-                <div className="action-content">
-                  <h3>View My Retailers</h3>
-                  <p>Check assigned retailer details</p>
-                </div>
-              </div>
-            </div>
-          </div>
+  <div className="action-cards">
+
+    <Link to="/staff/log-visit" className="action-card">
+      <div className="action-icon">📊</div>
+      <div className="action-content">
+        <h3>Log Sales Visit</h3>
+        <p>Record your latest retailer visit</p>
+      </div>
+    </Link>
+
+    <Link to="/staff_add_expensive" className="action-card">
+      <div className="action-icon">💰</div>
+      <div className="action-content">
+        <h3>Submit Expense</h3>
+        <p>Add your daily expenses</p>
+      </div>
+    </Link>
+
+    <Link to="/staff/add-retailer" className="action-card">
+      <div className="action-icon">🏪</div>
+      <div className="action-content">
+        <h3>Add Retailers</h3>
+        <p>Add Retailer details</p>
+      </div>
+    </Link>
+
+  </div>
+</div>
+
         </div>
       </div>
     </StaffMobileLayout>

@@ -1,0 +1,462 @@
+/* Staff Place Sales Order Styles - Unique Classnames */
+.staff-place-sales-order {
+  padding: 1rem;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.staff-order-header {
+  margin-bottom: 1.5rem;
+}
+
+.staff-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.staff-header-text h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.staff-header-text p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.staff-back-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.staff-back-btn:hover {
+  background: #4b5563;
+}
+
+.staff-search-section {
+  margin-bottom: 1.5rem;
+}
+
+.staff-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.staff-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.staff-order-content {
+  display: grid;
+  gap: 2rem;
+}
+
+.staff-products-section h2,
+.staff-cart-section h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.staff-loading, .staff-error {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.staff-error {
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #fecaca;
+}
+
+.staff-no-products {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.staff-products-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.staff-product-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.staff-product-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.staff-product-info {
+  flex: 1;
+}
+
+.staff-product-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.staff-product-category {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin: 0 0 0.25rem 0;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.staff-product-supplier {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.staff-product-price {
+  font-weight: bold;
+  color: #059669;
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+}
+
+.staff-product-gst {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.staff-add-to-cart-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.staff-add-to-cart-btn:hover {
+  background: #2563eb;
+}
+
+.staff-cart-section {
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.staff-empty-cart {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.staff-cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.staff-cart-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.staff-item-info {
+  flex: 1;
+}
+
+.staff-item-info h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.staff-item-info p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.staff-item-category {
+  font-size: 0.75rem !important;
+  color: #9ca3af !important;
+  margin-top: 0.25rem !important;
+}
+
+.staff-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.staff-quantity-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.staff-quantity-btn:hover {
+  background: #e5e7eb;
+}
+
+.staff-quantity {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.staff-item-total {
+  font-weight: bold;
+  color: #059669;
+  min-width: 5rem;
+  text-align: right;
+  font-size: 1rem;
+}
+
+.staff-remove-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background-color 0.2s;
+}
+
+.staff-remove-btn:hover {
+  background: #dc2626;
+}
+
+.staff-order-summary {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.staff-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.staff-total-amount {
+  color: #059669;
+  font-size: 1.25rem;
+}
+
+.staff-place-order-btn {
+  width: 100%;
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.staff-place-order-btn:hover:not(:disabled) {
+  background: #047857;
+}
+
+.staff-place-order-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.staff-error-container {
+  text-align: center;
+  padding: 3rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.staff-error-container h2 {
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.staff-back-retailers-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.staff-back-retailers-btn:hover {
+  background: #2563eb;
+}
+
+/* Credit Period Styles */
+.staff-credit-period-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.staff-credit-period-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.staff-credit-period-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: white;
+}
+
+.staff-credit-period-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Retailer Discount */
+.staff-retailer-discount {
+  color: #059669;
+  font-weight: 600;
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+}
+
+/* Item Credit Charges */
+.staff-item-credit {
+  color: #d97706;
+  font-size: 0.75rem;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
+/* Summary Row Styles */
+.staff-credit-charges {
+  color: #d97706;
+}
+
+.staff-credit-amount {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.staff-discount {
+  color: #059669;
+}
+
+.staff-discount-amount {
+  color: #059669;
+  font-weight: 600;
+}
+
+.staff-final-total {
+  border-top: 2px solid #e5e7eb;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.staff-total-amount {
+  color: #059669;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .staff-order-content {
+    grid-template-columns: 2fr 1fr;
+  }
+  
+  .staff-products-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .staff-header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .staff-back-btn {
+    align-self: flex-start;
+  }
+  
+  .staff-cart-section {
+    position: static;
+  }
+}

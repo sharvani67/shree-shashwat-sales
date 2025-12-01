@@ -130,11 +130,16 @@
   color: #333;
 }
 
-.action-cards {
+.action-card {
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
 }
+
 
 .action-card {
   display: flex;

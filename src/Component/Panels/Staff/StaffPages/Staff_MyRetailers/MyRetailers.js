@@ -1,61 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StaffMobileLayout from "../StaffMobileLayout/StaffMobileLayout";
+import { baseurl } from "../../../../BaseURL/BaseURL";
 import "./MyRetailers.css";
 
 function MyRetailers() {
   const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
+  const [retailers, setRetailers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const retailersData = [
-    {
-      id: 1,
-      name: "Sharma Electronics",
-      contact: "+91 98765 43210",
-      email: "sharma@email.com",
-      type: "Electronics",
-      location: "Delhi",
-      performance: "7.85 / 10",
-      sales: "₹ 125,000",
-      status: "Active"
-    },
-    {
-      id: 2,
-      name: "Gupta General Store",
-      contact: "+91 98765 43211",
-      email: "gupta@email.com",
-      type: "General Store",
-      location: "Mumbai",
-      performance: "7.72 / 10",
-      sales: "₹ 89,000",
-      status: "Active"
-    },
-    {
-      id: 3,
-      name: "Khan Textiles",
-      contact: "+91 98765 43212",
-      email: "khan@email.com",
-      type: "Textiles",
-      location: "Bangalore",
-      performance: "7.91 / 10",
-      sales: "₹ 156,000",
-      status: "Active"
-    }
-  ];
+  /** -----------------------------
+   *  Get logged-in user
+   * ----------------------------- */
+  const storedData = localStorage.getItem("user");
+  const user = storedData ? JSON.parse(storedData) : null;
 
-  const filteredRetailers = retailersData.filter(retailer =>
-    retailer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    retailer.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    retailer.location.toLowerCase().includes(searchTerm.toLowerCase())
+  const staffId = user?.id || null;
+  const role = user?.role || null;
+
+  useEffect(() => {
+    if (!staffId || role !== "staff") return;
+
+    setLoading(true);
+    setError(null);
+
+    fetch(`${baseurl}/get-sales-retailers/${staffId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then((result) => {
+        if (result.success) {
+          setRetailers(result.data);
+        } else {
+          throw new Error(result.error || "Failed to fetch retailers");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching retailers:", err);
+        setError("Failed to load retailers");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [staffId, role]);
+
+  /** -----------------------------
+   *  Search Filter
+   * ----------------------------- */
+  const filteredRetailers = retailers.filter((retailer) =>
+    retailer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    retailer.business_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    retailer.shipping_city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddRetailer = () => {
-    navigate("/staff/add-retailer");
+  const handleAddRetailer = () => navigate("/staff/add-retailer");
+
+  const handlePlaceOrder = (retailerId,discount) => {
+    navigate("/staff/place-sales-order", { 
+      state: { retailerId,discount } 
+    });
   };
 
   return (
     <StaffMobileLayout>
       <div className="my-retailers-mobile">
+
+        {/* 🔹 Header */}
         <div className="page-header">
           <div className="header-content">
             <div className="header-text">
@@ -68,10 +82,11 @@ function MyRetailers() {
           </div>
         </div>
 
+        {/* 🔹 Search */}
         <div className="search-section">
           <div className="search-bar">
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search retailers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -80,49 +95,55 @@ function MyRetailers() {
           </div>
         </div>
 
+        {/* 🔹 Retailers Section */}
         <div className="retailers-section">
+
           <div className="section-header">
             <h2>Retailers ({filteredRetailers.length})</h2>
             <p>Track retailer performance and manage relationships</p>
           </div>
 
+          {/* Loading */}
+          {loading && <p className="loading-text">Loading retailers...</p>}
+
+          {/* Error */}
+          {error && <p className="error-text">{error}</p>}
+
+          {/* List */}
           <div className="retailers-list">
-            {filteredRetailers.map(retailer => (
+            {!loading && filteredRetailers.length === 0 && (
+              <p className="empty-text">No retailers found.</p>
+            )}
+
+            {filteredRetailers.map((retailer) => (
               <div key={retailer.id} className="retailer-card">
+
                 <div className="retailer-header">
                   <h3>{retailer.name}</h3>
-                  <span className="retailer-id">ID: {retailer.id}</span>
+                  <button 
+                    className="place-order-btn"
+                    onClick={() => handlePlaceOrder(retailer.id,retailer.discount)}
+                  >
+                    Place Order
+                  </button>
                 </div>
-                
+
                 <div className="retailer-contact">
-                  <div className="contact-phone">{retailer.contact}</div>
+                  <div className="contact-phone">{retailer.mobile_number}</div>
                   <div className="contact-email">{retailer.email}</div>
                 </div>
 
-                <div className="retailer-details">
-                  <div className="type-location">
-                    <span className="retailer-type">{retailer.type}</span>
-                    <span className="retailer-location">{retailer.location}</span>
-                  </div>
+                <div className="retailer-extra">
+                  <p><strong>Business:</strong> {retailer.business_name}</p>
+                  <p><strong>Location:</strong> {retailer.shipping_city}</p>
+                  <p><strong>Status:</strong> {retailer.status || "—"}</p>
                 </div>
 
-                <div className="retailer-performance">
-                  <div className="performance-score">
-                    <span className="score-icon">▼</span>
-                    {retailer.performance}
-                  </div>
-                  <div className="sales-amount">{retailer.sales}</div>
-                </div>
-
-                <div className="retailer-status">
-                  <span className={`status-badge ${retailer.status.toLowerCase()}`}>
-                    {retailer.status}
-                  </span>
-                </div>
               </div>
             ))}
           </div>
         </div>
+
       </div>
     </StaffMobileLayout>
   );

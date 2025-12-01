@@ -6,7 +6,6 @@ import "./SalesVisits.css";
 
 function SalesVisits() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Sales Visits");
   const [searchTerm, setSearchTerm] = useState("");
   const [salesVisitsData, setSalesVisitsData] = useState([]);
   const [retailers, setRetailers] = useState([]);
@@ -21,8 +20,6 @@ function SalesVisits() {
   const user = storedData ? JSON.parse(storedData) : null;
   const staffId = user?.id || null;
   const role = user?.role || null;
-
-  const tabs = ["Sales Visits", "Transactions"];
 
   // Fetch Sales Visits
   useEffect(() => {
@@ -181,16 +178,15 @@ function SalesVisits() {
     <StaffMobileLayout>
       <div className="sales-visits-mobile">
         <div className="page-header">
-     <div className="header-content">
-  <div className="header-text">
-    <h1>Sales Visits ({salesVisitsData.length})</h1>
-    <p>Track your retailer visits and outcomes</p>
-  </div>
-  <button className="log-visit-btn" onClick={handleLogVisit}>
-    + Log Visit
-  </button>
-</div>
-
+          <div className="header-content">
+            <div className="header-text">
+              <h1>Sales Visits ({salesVisitsData.length})</h1>
+              <p>Track your retailer visits and outcomes</p>
+            </div>
+            <button className="log-visit-btn" onClick={handleLogVisit}>
+              + Log Visit
+            </button>
+          </div>
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -205,146 +201,130 @@ function SalesVisits() {
           />
         </div>
 
-        <div className="tabs-section">
-          <div className="tabs-container">
-            {tabs.map((tab) => (
-              <div
-                key={tab}
-                className={`tab-item ${activeTab === tab ? "active" : ""}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Sales Visits List - Directly shown without tabs */}
+        <div className="sales-visits-list">
+          {loading ? (
+            <p>Loading sales visits...</p>
+          ) : filteredSalesVisits.length === 0 ? (
+            <p>No sales visits found.</p>
+          ) : (
+            filteredSalesVisits.map((visit) => (
+              <div key={visit.id} className="visit-card">
+                {editingVisitId === visit.id ? (
+                  <div className="edit-form">
+                    {/* Non-editable */}
+                    <label>Visit ID</label>
+                    <input type="text" value={visit.id} disabled className="edit-input" />
+                    
+                    <label>Staff Name</label>
+                    <input type="text" value={visit.staff_name} disabled className="edit-input" />
+                    
+                    <label>Created At</label>
+                    <input type="text" value={new Date(visit.created_at).toLocaleDateString("en-GB")} disabled className="edit-input" />
+                    
+                    <label>Retailer</label>
+                    <select
+                      name="retailer_id"
+                      value={editFormData.retailer_id || visit.retailer_id}
+                      onChange={(e) => {
+                        const selectedRetailer = retailers.find(r => r.retailer_id === e.target.value);
+                        setEditFormData(prev => ({
+                          ...prev,
+                          retailer_id: e.target.value,
+                          retailer_name: selectedRetailer?.retailer_name || "",
+                        }));
+                      }}
+                      className="edit-input"
+                    >
+                      <option value="">Select retailer</option>
+                      {retailers.map(r => (
+                        <option key={r.retailer_id} value={r.retailer_id}>{r.retailer_name}</option>
+                      ))}
+                    </select>
 
-        {activeTab === "Sales Visits" && (
-          <div className="sales-visits-list">
-            {loading ? (
-              <p>Loading sales visits...</p>
-            ) : filteredSalesVisits.length === 0 ? (
-              <p>No sales visits found.</p>
-            ) : (
-              filteredSalesVisits.map((visit) => (
-                <div key={visit.id} className="visit-card">
-                  {editingVisitId === visit.id ? (
-                    <div className="edit-form">
-                      {/* Non-editable */}
-                      <label>Visit ID</label>
-                      <input type="text" value={visit.id} disabled className="edit-input" />
-                      
-                      <label>Staff Name</label>
-                      <input type="text" value={visit.staff_name} disabled className="edit-input" />
-                      
-                      <label>Created At</label>
-                      <input type="text" value={new Date(visit.created_at).toLocaleDateString("en-GB")} disabled className="edit-input" />
-                      
-                      <label>Retailer</label>
-                      <select
-                        name="retailer_id"
-                        value={editFormData.retailer_id || visit.retailer_id}
-                        onChange={(e) => {
-                          const selectedRetailer = retailers.find(r => r.retailer_id === e.target.value);
-                          setEditFormData(prev => ({
-                            ...prev,
-                            retailer_id: e.target.value,
-                            retailer_name: selectedRetailer?.retailer_name || "",
-                          }));
-                        }}
-                        className="edit-input"
-                      >
-                        <option value="">Select retailer</option>
-                        {retailers.map(r => (
-                          <option key={r.retailer_id} value={r.retailer_id}>{r.retailer_name}</option>
-                        ))}
-                      </select>
+                    {/* Editable fields */}
+                    <label>Visit Outcome</label>
+                    <select
+                      name="visit_outcome"
+                      value={editFormData.visit_outcome}
+                      onChange={handleInputChange}
+                      className="edit-input"
+                    >
+                      <option value="">Select outcome</option>
+                      <option value="Successful">Successful</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Failed">Failed</option>
+                      <option value="Rescheduled">Rescheduled</option>
+                    </select>
 
-                      {/* Editable fields */}
-                      <label>Visit Outcome</label>
-                      <select
-                        name="visit_outcome"
-                        value={editFormData.visit_outcome}
-                        onChange={handleInputChange}
-                        className="edit-input"
-                      >
-                        <option value="">Select outcome</option>
-                        <option value="Successful">Successful</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Failed">Failed</option>
-                        <option value="Rescheduled">Rescheduled</option>
-                      </select>
+                    <label>Sales Amount</label>
+                    <input type="number" name="sales_amount" value={editFormData.sales_amount} onChange={handleInputChange} className="edit-input" />
 
-                      <label>Sales Amount</label>
-                      <input type="number" name="sales_amount" value={editFormData.sales_amount} onChange={handleInputChange} className="edit-input" />
+                    <label>Transaction Type</label>
+                    <select name="transaction_type" value={editFormData.transaction_type} onChange={handleInputChange} className="edit-input">
+                      <option value="">Select transaction type</option>
+                      <option value="Paikka">Paikka</option>
+                      <option value="Kaccha">Kaccha</option>
+                      <option value="Partial">Partial</option>
+                      <option value="Full">Full</option>
+                    </select>
 
-                      <label>Transaction Type</label>
-                      <select name="transaction_type" value={editFormData.transaction_type} onChange={handleInputChange} className="edit-input">
-                        <option value="">Select transaction type</option>
-                        <option value="Paikka">Paikka</option>
-                        <option value="Kaccha">Kaccha</option>
-                        <option value="Partial">Partial</option>
-                        <option value="Full">Full</option>
-                      </select>
+                    <label>Visit Type</label>
+                    <select name="visit_type" value={editFormData.visit_type} onChange={handleInputChange} className="edit-input">
+                      <option value="">Select visit type</option>
+                      <option value="Routine">Routine</option>
+                      <option value="Follow Up">Follow Up</option>
+                      <option value="New Retailer">New Retailer</option>
+                      <option value="Issue Resolution">Issue Resolution</option>
+                    </select>
 
-                      <label>Visit Type</label>
-                      <select name="visit_type" value={editFormData.visit_type} onChange={handleInputChange} className="edit-input">
-                        <option value="">Select visit type</option>
-                        <option value="Routine">Routine</option>
-                        <option value="Follow Up">Follow Up</option>
-                        <option value="New Retailer">New Retailer</option>
-                        <option value="Issue Resolution">Issue Resolution</option>
-                      </select>
-
-                      <div className="edit-actions">
-                      
-                        <button className="cancel-btn" onClick={() => setEditingVisitId(null)}>Cancel</button>
-                          <button className="update-btn" onClick={() => handleUpdateVisit(visit.id)}>Update</button>
+                    <div className="edit-actions">
+                      <button className="cancel-btn" onClick={() => setEditingVisitId(null)}>Cancel</button>
+                      <button className="update-btn" onClick={() => handleUpdateVisit(visit.id)}>Update</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="visit-header">
+                      <div className="visit-id">{visit.id}</div>
+                      <span className={`outcome-badge ${visit.visit_outcome?.toLowerCase()}`}>{visit.visit_outcome}</span>
+                    </div>
+                    <div className="visit-retailer">
+                      <div className="retailer-name">{visit.retailer_name}</div>
+                      <div className="retailer-id">ID: {visit.retailer_id}</div>
+                    </div>
+                    <div className="visit-details">
+                      <div className="detail-row">
+                        <span className="detail-label">Date & Type:</span>
+                        <span className="detail-value">{new Date(visit.created_at).toLocaleDateString("en-GB")} • {visit.visit_type}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Sales Amount:</span>
+                        <span className="detail-value">{visit.sales_amount}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Transaction Type:</span>
+                        <span className="detail-value">{visit.transaction_type}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Staff:</span>
+                        <span className="detail-value">{visit.staff_name}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Role:</span>
+                        <span className="detail-value">{role}</span>
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="visit-header">
-                        <div className="visit-id">{visit.id}</div>
-                        <span className={`outcome-badge ${visit.visit_outcome?.toLowerCase()}`}>{visit.visit_outcome}</span>
-                      </div>
-                      <div className="visit-retailer">
-                        <div className="retailer-name">{visit.retailer_name}</div>
-                        <div className="retailer-id">ID: {visit.retailer_id}</div>
-                      </div>
-                      <div className="visit-details">
-                        <div className="detail-row">
-                          <span className="detail-label">Date & Type:</span>
-                          <span className="detail-value">{new Date(visit.created_at).toLocaleDateString("en-GB")} • {visit.visit_type}</span>
-                        </div>
-                        <div className="detail-row">
-                          <span className="detail-label">Sales Amount:</span>
-                          <span className="detail-value">{visit.sales_amount}</span>
-                        </div>
-                        <div className="detail-row">
-                          <span className="detail-label">Transaction Type:</span>
-                          <span className="detail-value">{visit.transaction_type}</span>
-                        </div>
-                        <div className="detail-row">
-                          <span className="detail-label">Staff:</span>
-                          <span className="detail-value">{visit.staff_name}</span>
-                        </div>
-                        <div className="detail-row">
-                          <span className="detail-label">Role:</span>
-                          <span className="detail-value">{role}</span>
-                        </div>
-                      </div>
-                      <div className="card-actions">
-                        <button className="edit-icon" onClick={() => handleEditVisit(visit)}>✏️</button>
-                        <button className="delete-icon" onClick={() => handleDeleteVisit(visit)}>🗑️</button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        )}
+                    <div className="card-actions">
+                      <button className="edit-icon" onClick={() => handleEditVisit(visit)}>✏️</button>
+                      <button className="delete-icon" onClick={() => handleDeleteVisit(visit)}>🗑️</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </StaffMobileLayout>
   );
