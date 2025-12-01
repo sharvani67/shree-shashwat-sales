@@ -165,8 +165,9 @@ import KachaInvoiceTable from "./Component/Panels/Admin/KachaSales/KachaInvoiceT
 import KachaInvoicePDFPreview from "./Component/Panels/Admin/KachaSales/KachaInvoicePDFPreview";
 import Period from "./Component/Panels/Admin/Period/Period";
 import PlaceSalesOrder from "./Component/Panels/Staff/StaffPages/PlaceOrder/PlaceSalesOrder";
+import ViewDetails from "./Component/Panels/Staff/StaffPages/Staff_MyRetailers/ViewDetails";
 
-
+import ProfilePage from "./Component/Panels/Staff/StaffPages/StaffMobileLayout/ProfilePage";
 
 
 function App() {
@@ -199,6 +200,8 @@ function App() {
 
         {/* Staff Mobile Pages */}
         <Route path="/staff/retailers" element={<MyRetailers />} />
+                <Route path="/staff/view-retailers/:id" element={<ViewDetails />} />
+<Route path="/staff/profile" element={<ProfilePage />} />
         <Route path="/staff/add-retailer" element={<AddRetailer />} />
         <Route path="/staff/sales-visits" element={<SalesVisits />} />
         <Route path="/staff/log-visit" element={<LogVisit />} />

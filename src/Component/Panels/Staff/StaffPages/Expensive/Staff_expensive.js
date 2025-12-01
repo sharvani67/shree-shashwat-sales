@@ -48,7 +48,7 @@ function Staff_expensive() {
   return (
     <StaffMobileLayout>
       <div className="my-retailers-mobile">
-        <div className="page-header">
+        <div className="page-header1">
           <div className="header-content">
             <div className="header-text">
               <h1>Expenses</h1>
