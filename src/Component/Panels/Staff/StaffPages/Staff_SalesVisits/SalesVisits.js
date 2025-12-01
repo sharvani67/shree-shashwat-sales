@@ -177,7 +177,7 @@ function SalesVisits() {
   return (
     <StaffMobileLayout>
       <div className="sales-visits-mobile">
-        <div className="page-header">
+        <div className="page-header1">
           <div className="header-content">
             <div className="header-text">
               <h1>Sales Visits ({salesVisitsData.length})</h1>

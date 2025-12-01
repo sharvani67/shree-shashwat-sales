@@ -123,7 +123,7 @@ function LogVisit() {
   return (
     <StaffMobileLayout>
       <div className="log-visit-mobile">
-        <header className="form-header">
+        <header className="form-header1">
           <h1>Log Sales Visit</h1>
           <p>Record details of your retailer visit</p>
         </header>
@@ -241,7 +241,7 @@ function LogVisit() {
             <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancel
             </button>
-             <button type="submit" className="submit-btn">
+             <button type="submit" className="submit-btn log-btn">
             Submit
             </button>
           

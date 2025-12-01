@@ -92,6 +92,17 @@ textarea {
   cursor: not-allowed;
 }
 
+
+@media (max-width: 480px) {
+    
+  .staff_add_expensive-cancel-save .save-buttons {
+
+    margin-top: 0px;
+
+
+}
+}
+
 /* Mobile Responsive (360px–740px) */
 @media (min-width: 360px) and (max-width: 740px) {
   .Staff_add_expense-container {

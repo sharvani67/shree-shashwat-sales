@@ -103,6 +103,17 @@
   background: #0056b3;
 }
 
+
+@media (max-width: 480px) {
+    
+  .form-buttons .log-btn {
+
+    margin-top: 0px;
+
+
+}
+}
+
 /* Responsive adjustments */
 @media (max-width: 360px) {
   .log-visit-mobile {

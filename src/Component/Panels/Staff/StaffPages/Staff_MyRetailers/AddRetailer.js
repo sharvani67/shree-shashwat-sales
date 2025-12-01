@@ -17,14 +17,14 @@ function AddRetailer({ mode = "add" }) {
   const [activeTab, setActiveTab] = useState("information");
   const [errors, setErrors] = useState({});
   // Retrieve data from localStorage
-const storedData = localStorage.getItem("user");
+  const storedData = localStorage.getItem("user");
 
-// Parse it back into an object
-const user = storedData ? JSON.parse(storedData) : null;
+  // Parse it back into an object
+  const user = storedData ? JSON.parse(storedData) : null;
 
-// Get id and name separately
-const userId = user ? user.id : null;
-const userName = user ? user.name : null;
+  // Get id and name separately
+  const userId = user ? user.id : null;
+  const userName = user ? user.name : null;
 
 
   const [formData, setFormData] = useState({
@@ -32,10 +32,10 @@ const userName = user ? user.name : null;
     name: "",
     entity_type: "",
     group: "customer",
-    role: "retailer", 
+    role: "retailer",
     gstin: "",
     email: "",
-      assigned_staff: userName,
+    assigned_staff: userName,
     staffid: userId,
     business_name: "",
     display_name: "",
@@ -84,7 +84,7 @@ const userName = user ? user.name : null;
   ];
 
   const getAuthToken = () => {
-    return localStorage.getItem("token") || ""; 
+    return localStorage.getItem("token") || "";
   };
 
   useEffect(() => {
@@ -185,9 +185,8 @@ const userName = user ? user.name : null;
           const result = response.data.result;
           const addr = result.pradr?.addr || {};
           const addressLine1 = `${addr.bno || ""}${addr.bno && addr.flno ? ", " : ""}${addr.flno || ""}`.trim();
-          const addressLine2 = `${addr.st || ""}${addr.st && addr.bnm ? ", " : ""}${addr.bnm || ""}${
-            (addr.st || addr.bnm) && addr.loc ? ", " : ""
-          }${addr.loc || ""}`.trim();
+          const addressLine2 = `${addr.st || ""}${addr.st && addr.bnm ? ", " : ""}${addr.bnm || ""}${(addr.st || addr.bnm) && addr.loc ? ", " : ""
+            }${addr.loc || ""}`.trim();
           setFormData((prev) => ({
             ...prev,
             gst_registered_name: result.lgnm || "",
@@ -479,13 +478,17 @@ const userName = user ? user.name : null;
             {renderField({ type: "tel", name: "mobile_number", label: "Mobile Number" })}
             {renderField({ name: "password", label: "Password", required: false })}
             <div className="form-buttons">
-              <button type="button" className="cancel-btn" onClick={handleCancel}>
-                Cancel
-              </button>
-              <button type="button" className="submit-btn" onClick={handleNext}>
-                Banking & Taxes
-              </button>
+              <div className="mobile-button-row">
+
+                <button type="button" className="cancel-btn" onClick={handleCancel}>
+                  Cancel
+                </button>
+                <button type="button" className="submit-btn bank-button" onClick={handleNext}>
+                  Banking & Taxes
+                </button>
+              </div>
             </div>
+
           </div>
         );
       case "banking":
@@ -575,13 +578,17 @@ const userName = user ? user.name : null;
               })}
             </div>
             <div className="form-buttons">
-              <button type="button" className="cancel-btn" onClick={handleBack}>
-                Back
-              </button>
-              <button type="button" className="submit-btn" onClick={handleNext}>
-                Next: Shipping Address
-              </button>
+              <div className="mobile-button-row">
+
+                <button type="button" className="cancel-btn" onClick={handleBack}>
+                  Back
+                </button>
+                <button type="button" className="submit-btn bank-button" onClick={handleNext}>
+                  Next: Shipping Address
+                </button>
+              </div>
             </div>
+
           </div>
         );
       case "shipping":
@@ -617,13 +624,17 @@ const userName = user ? user.name : null;
             {renderField({ name: "shipping_branch_name", label: "Branch Name", required: false })}
             {renderField({ name: "shipping_gstin", label: "GSTIN", required: false })}
             <div className="form-buttons">
-              <button type="button" className="cancel-btn" onClick={handleBack}>
-                Back
-              </button>
-              <button type="button" className="submit-btn" onClick={handleNext}>
-                Next: Billing Address
-              </button>
+              <div className="mobile-button-row">
+
+                <button type="button" className="cancel-btn" onClick={handleBack}>
+                  Back
+                </button>
+                <button type="button" className="submit-btn bank-button" onClick={handleNext}>
+                  Next: Billing Address
+                </button>
+              </div>
             </div>
+
           </div>
         );
       case "billing":
@@ -684,13 +695,17 @@ const userName = user ? user.name : null;
               </div>
             )}
             <div className="form-buttons">
-              <button type="button" className="cancel-btn" onClick={handleBack}>
-                Back
-              </button>
-              <button type="submit" className="submit-btn">
-                Add Retailer
-              </button>
+              <div className="mobile-button-row">
+
+                <button type="button" className="cancel-btn" onClick={handleBack}>
+                  Back
+                </button>
+                <button type="submit" className="submit-btn  bank-button">
+                  Add Retailer
+                </button>
+              </div>
             </div>
+
           </div>
         );
       default:

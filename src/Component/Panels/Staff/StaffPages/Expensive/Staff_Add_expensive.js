@@ -155,7 +155,7 @@ const Staff_Add_expensive = () => {
               <button type="button" className="cancel-btn" onClick={handleCancel}>
                 Cancel
               </button>
-              <button type="submit" className="submit-btn">
+              <button type="submit" className="submit-btn save-buttons">
                 Save Expense
               </button>
             </div>

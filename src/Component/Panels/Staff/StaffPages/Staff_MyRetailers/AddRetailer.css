@@ -1,4 +1,4 @@
-add-retailer-mobile {
+.add-retailer-mobile {
   padding: 20px;
   background-color: #f5f5f5;
   min-height: 100vh;
@@ -243,54 +243,64 @@ add-retailer-mobile {
   .form-buttons {
     flex-direction: column;
   }
+}
 
-  .form-buttons {
+
+
+/* Wrapper that holds both buttons in one row */
+.mobile-button-row {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
   width: 100%;
+  margin-top: 20px;
 }
 
-.btn-add {
-  flex: 0 0 30%; /* Fixed 30% width */
-  padding: 14px 16px;
-  border: none;
+/* Styles for buttons */
+.mobile-button-row button {
+  flex: 1;                 /* both buttons get equal width */
+  /* padding: 12px; */
   border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: #f8f9fa;
-  color: #666;
-  border: 1px solid #e0e0e0;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.btn-text {
-  flex: 0 0 70%; /* Fixed 70% width */
-  padding: 14px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: #007bff;
-  color: white;
+  white-space: nowrap;     /* prevents text break like "Banking & Taxes" */
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 16px;
 }
 
-.btn-add:hover {
-  background: #e9ecef;
+/* Optional: add colors */
+.cancel-btn {
+  background-color: #bbb;
+  color: #000;
 }
 
-.btn-text:hover {
-  background: #0056b3;
+.submit-btn {
+  background-color: #082567;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+    
+  .form-buttons
+  .mobile-button-row 
+   .bank-button {
+
+    margin-top: 0px;
+
+
 }
 }
+
+/* For very small screens */
+@media (max-width: 360px) {
+  .mobile-button-row button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+ 
+}
+
+
+
