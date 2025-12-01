@@ -1,0 +1,171 @@
+.orders-m-container {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header */
+.orders-m-header {
+  margin-bottom: 20px;
+}
+
+.orders-m-header-text h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2563eb;
+}
+
+.orders-m-header-text p {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Search */
+.orders-m-search {
+  margin-bottom: 20px;
+}
+
+.orders-m-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+/* Section Title */
+.orders-m-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.orders-m-section-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+/* Cards */
+.orders-m-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.orders-m-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #f0f0f0;
+}
+
+/* Header inside card */
+.orders-m-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.orders-m-card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.orders-m-id {
+  font-size: 12px;
+  background: #eee;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+/* Info */
+.orders-m-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.orders-m-amount {
+  font-weight: 600;
+  color: #000;
+}
+
+/* Footer */
+.orders-m-footer {
+  text-align: right;
+  margin-top: 10px;
+}
+
+.orders-m-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.orders-m-status.delivered {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Mobile */
+@media(max-width: 480px) {
+  .orders-m-card {
+    padding: 14px;
+  }
+}
+
+.orders-m-items-section {
+  margin-top: 12px;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.orders-m-items-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #2563eb;
+}
+
+.orders-m-item-card {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+}
+
+.orders-m-item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.orders-m-item-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.orders-m-item-qty {
+  font-size: 13px;
+  color: #444;
+}
+
+.orders-m-item-price {
+  font-size: 13px;
+  color: #666;
+}
+
+.orders-m-loading {
+  font-size: 13px;
+  color: #777;
+}
+

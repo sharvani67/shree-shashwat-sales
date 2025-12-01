@@ -701,8 +701,8 @@ const userName = user ? user.name : null;
   return (
     <StaffMobileLayout>
       <div className="add-retailer-mobile">
-        <header className="form-header">
-          <h1>{getTitle()}</h1>
+        <header className="form-header1">
+          <h2>{getTitle()}</h2>
           <p>Fill in the details to add a retailer to your network</p>
         </header>
         <form onSubmit={handleSubmit} className="retailer-form">

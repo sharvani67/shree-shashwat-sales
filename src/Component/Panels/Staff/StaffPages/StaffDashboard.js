@@ -4,12 +4,14 @@ import "./StaffDashboard.css";
 import { Link } from "react-router-dom";
 
 function StaffDashboard() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const staffName = user?.name || "Staff Member";
   return (
     <StaffMobileLayout>
       <div className="staff-dashboard-mobile">
         {/* Header Section */}
         <header className="dashboard-header">
-          <h1>Good morning, Staff Member <span className="emoji">💡</span></h1>
+          <h1>Good morning, {staffName} <span className="emoji"></span></h1>
           <p>Here's your performance summary and today's tasks.</p>
         </header>
 

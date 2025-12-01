@@ -1,0 +1,66 @@
+.orderfd-m-container {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.orderfd-m-header h1 {
+  color: #2563eb;
+  font-size: 24px;
+  margin: 0;
+}
+
+.orderfd-m-header p {
+  font-size: 14px;
+  color: #444;
+}
+
+/* SUMMARY CARD */
+.orderfd-m-summary-card {
+  background: white;
+  padding: 16px;
+  margin-top: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.orderfd-m-summary-card p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+/* ITEMS TITLE */
+.orderfd-m-title {
+  font-size: 18px;
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+/* ITEMS LIST */
+.orderfd-m-items-list {
+  margin-top: 12px;
+}
+
+.orderfd-m-item-card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.orderfd-m-item-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.orderfd-m-item-header h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.orderfd-m-item-card p {
+  margin: 5px 0;
+  font-size: 14px;
+}

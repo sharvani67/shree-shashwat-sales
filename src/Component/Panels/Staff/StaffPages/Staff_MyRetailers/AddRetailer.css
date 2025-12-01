@@ -243,4 +243,54 @@ add-retailer-mobile {
   .form-buttons {
     flex-direction: column;
   }
+
+  .form-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.btn-add {
+  flex: 0 0 30%; /* Fixed 30% width */
+  padding: 14px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #e0e0e0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-text {
+  flex: 0 0 70%; /* Fixed 70% width */
+  padding: 14px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #007bff;
+  color: white;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-add:hover {
+  background: #e9ecef;
+}
+
+.btn-text:hover {
+  background: #0056b3;
+}
 }

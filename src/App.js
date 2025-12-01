@@ -168,8 +168,12 @@ import PlaceSalesOrder from "./Component/Panels/Staff/StaffPages/PlaceOrder/Plac
 import Cart from "./Component/Panels/Staff/StaffPages/Cart/Cart"
 import CheckoutPage from "./Component/Panels/Staff/StaffPages/CheckOut/CheckOut";
 import OrderSuccess from "./Component/Panels/Staff/StaffPages/OrderPlaced/OrderPlace";
+import ViewDetails from "./Component/Panels/Staff/StaffPages/Staff_MyRetailers/ViewDetails";
+import StaffOrders from "./Component/Panels/Staff/StaffPages/PlaceOrder/StaffOrders";
+import OrderFullDetails from "./Component/Panels/Staff/StaffPages/PlaceOrder/OrderFullDetails";
 
 
+import ProfilePage from "./Component/Panels/Staff/StaffPages/StaffMobileLayout/ProfilePage";
 
 
 function App() {
@@ -202,6 +206,8 @@ function App() {
 
         {/* Staff Mobile Pages */}
         <Route path="/staff/retailers" element={<MyRetailers />} />
+                <Route path="/staff/view-retailers/:id" element={<ViewDetails />} />
+<Route path="/staff/profile" element={<ProfilePage />} />
         <Route path="/staff/add-retailer" element={<AddRetailer />} />
         <Route path="/staff/sales-visits" element={<SalesVisits />} />
         <Route path="/staff/log-visit" element={<LogVisit />} />
@@ -213,6 +219,17 @@ function App() {
            // In your routes configuration
           <Route path="/staff/checkout" element={<CheckoutPage />} />
           <Route path="/staff/order-success" element={<OrderSuccess />} />
+
+         <Route path="/staff/orders" element={<StaffOrders />} />
+
+         <Route
+  path="/staff/order-details/:orderNumber"
+  element={<OrderFullDetails />}
+/>
+
+
+
+           
 
         {/* Admin  Pages */}
         
