@@ -7,7 +7,8 @@ import {
   FaChartLine,
   FaUser,
   FaSignOutAlt,
-  FaMoneyBillWave 
+  FaMoneyBillWave, 
+  FaShoppingBag
 } from "react-icons/fa";
 import "./StaffMobileLayout.css";
 
@@ -20,7 +21,8 @@ function StaffMobileLayout({ children }) {
     { path: "/staff/retailers", icon: <FaBullseye />, label: "Retailers" },
     { path: "/staff/sales-visits", icon: <FaClipboardList />, label: "Sales Visits" },
     // { path: "/staff/expences", icon: <FaChartLine />, label: "Expenses" },
-    { path: "/staff/offers", icon: <FaUser />, label: "Offers" },
+    // { path: "/staff/offers", icon: <FaUser />, label: "Offers" },
+    { path: "/staff/orders", icon: <FaShoppingBag />, label: "Orders" },
     { path: "/staff_expensive", icon: <FaMoneyBillWave />, label: "Expenses" },
   ];
 

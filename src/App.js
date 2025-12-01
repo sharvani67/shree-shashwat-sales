@@ -165,6 +165,9 @@ import KachaInvoiceTable from "./Component/Panels/Admin/KachaSales/KachaInvoiceT
 import KachaInvoicePDFPreview from "./Component/Panels/Admin/KachaSales/KachaInvoicePDFPreview";
 import Period from "./Component/Panels/Admin/Period/Period";
 import PlaceSalesOrder from "./Component/Panels/Staff/StaffPages/PlaceOrder/PlaceSalesOrder";
+import StaffOrders from "./Component/Panels/Staff/StaffPages/PlaceOrder/StaffOrders";
+import OrderFullDetails from "./Component/Panels/Staff/StaffPages/PlaceOrder/OrderFullDetails";
+
 
 
 
@@ -206,6 +209,16 @@ function App() {
         <Route path="/staff/add-expense" element={<AddExpense />} />
         <Route path="/staff/offers" element={<StaffOffers />} />
         <Route path="/staff/place-sales-order" element={<PlaceSalesOrder />} />
+
+         <Route path="/staff/orders" element={<StaffOrders />} />
+
+         <Route
+  path="/staff/order-details/:orderNumber"
+  element={<OrderFullDetails />}
+/>
+
+
+
            
 
         {/* Admin  Pages */}
