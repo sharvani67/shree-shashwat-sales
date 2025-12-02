@@ -72,51 +72,60 @@ function Checkout() {
 
   const finalTotals = calculateTotals();
 
-  const handlePlaceOrder = async () => {
-    if (!retailerId || !cartItems || cartItems.length === 0) {
-      alert("Missing required information");
-      return;
+// Checkout.jsx - Fixed handlePlaceOrder function
+const handlePlaceOrder = async () => {
+  if (!retailerId || !cartItems || cartItems.length === 0) {
+    alert("Missing required information");
+    return;
+  }
+
+  // Get staff ID from localStorage if not passed in state
+  const loggedInUser = localStorage.getItem("user");
+  let actualStaffId = staffId;
+  
+  if (!actualStaffId && loggedInUser) {
+    try {
+      const user = JSON.parse(loggedInUser);
+      actualStaffId = user.id; // Assuming staff ID is in user.id
+      console.log("Using staff ID from localStorage:", actualStaffId);
+    } catch (err) {
+      console.error("Error parsing user data:", err);
     }
+  }
 
-    // Get staff ID from localStorage if not passed in state
-    const loggedInUser = localStorage.getItem("user");
-    let actualStaffId = staffId;
-    
-    if (!actualStaffId && loggedInUser) {
-      try {
-        const user = JSON.parse(loggedInUser);
-        actualStaffId = user.id; // Assuming staff ID is in user.id
-        console.log("Using staff ID from localStorage:", actualStaffId);
-      } catch (err) {
-        console.error("Error parsing user data:", err);
-      }
-    }
+  if (!actualStaffId) {
+    alert("Staff ID is required. Please log in again.");
+    return;
+  }
 
-    if (!actualStaffId) {
-      alert("Staff ID is required. Please log in again.");
-      return;
-    }
+  setLoading(true);
 
-    setLoading(true);
+  // Generate order number (you might want to generate this differently)
+  const orderNumber = `ORD${Date.now()}`;
 
-    // Prepare order data
-    const orderData = {
-    customer_id: retailerId,
-    customer_name: customerName || "Walk-in Customer",
-    order_total: finalTotals.subtotal,
-    discount_amount: finalTotals.discountAmount,
-    taxable_amount: finalTotals.subtotal,
-    tax_amount: 0,
-    net_payable: finalTotals.finalTotal,
-    credit_period: cartItems[0]?.credit_period || "0",
-    estimated_delivery_date: new Date().toISOString().split('T')[0],
-    order_placed_by: actualStaffId, // Staff ID
-    staff_id: actualStaffId, // Also send as staff_id
-    order_mode: "KACHA",
-    clear_cart: true, // Optional: tell backend to clear cart
-    items: cartItems.map(item => ({
+  // Prepare order data in the format backend expects
+  const orderData = {
+    order: {
+      order_number: orderNumber,
+      customer_id: retailerId,
+      customer_name: customerName || "Walk-in Customer",
+      order_total: finalTotals.subtotal,
+      discount_amount: finalTotals.discountAmount,
+      taxable_amount: finalTotals.subtotal,
+      tax_amount: 0,
+      net_payable: finalTotals.finalTotal,
+      credit_period: cartItems[0]?.credit_period || 0,
+      estimated_delivery_date: new Date().toISOString().split('T')[0],
+      order_placed_by: actualStaffId, // Staff ID
+      order_mode: "KACHA",
+      // Note: remove staff_id if not in your orders table schema
+    },
+    orderItems: cartItems.map(item => ({
+      order_number: orderNumber,
       item_name: item.item_name || `Product ${item.product_id}`,
       product_id: item.product_id,
+      mrp: item.mrp || item.price,
+      sale_price: item.sale_price || item.price,
       price: item.price || 0,
       quantity: item.quantity || 1,
       total_amount: (item.price || 0) * (item.quantity || 1),
@@ -126,48 +135,55 @@ function Checkout() {
       tax_percentage: item.tax_percentage || 0,
       tax_amount: item.tax_amount || 0,
       item_total: (item.price || 0) * (item.quantity || 1),
-      credit_period: item.credit_period || "0",
+      credit_period: item.credit_period || 0,
       credit_percentage: item.credit_percentage || 0,
-      // Add these if your items have them
-      mrp: item.mrp || item.price,
-      sale_price: item.sale_price || item.price
+      sgst_percentage: item.sgst_percentage || 0,
+      sgst_amount: item.sgst_amount || 0,
+      cgst_percentage: item.cgst_percentage || 0,
+      cgst_amount: item.cgst_amount || 0,
+      discount_applied_scheme: item.discount_applied_scheme || null
     }))
   };
 
   console.log("Sending order data:", orderData);
 
-    try {
-      const response = await fetch(`${baseurl}/orders/create-complete-order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
+  try {
+    const response = await fetch(`${baseurl}/orders/create-complete-order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    const result = await response.json();
+    console.log("Order response:", result);
+
+    if (response.ok && result.success) {
+      setOrderDetails({
+        orderNumber: result.order_number,
+        orderId: result.order_id,
+        amount: finalTotals.finalTotal,
+        customerName: customerName || "Walk-in Customer",
+        staffId: actualStaffId,
+        date: new Date().toLocaleDateString()
       });
-
-      const result = await response.json();
-      console.log("Order response:", result);
-
-      if (response.ok && result.success) {
-        setOrderDetails({
-          orderNumber: result.order_number,
-          orderId: result.order_id,
-          amount: result.net_payable,
-          customerName: customerName,
-          staffId: result.staff_id,
-          date: new Date().toLocaleDateString()
-        });
-        setOrderPlaced(true);
-      } else {
-        throw new Error(result.error || result.details || "Failed to place order");
+      setOrderPlaced(true);
+      
+      // Optional: Clear cart after successful order
+      if (location.state?.clearCart) {
+        // Add cart clearing logic here if needed
       }
-    } catch (error) {
-      console.error("Error placing order:", error);
-      alert(`Order failed: ${error.message}`);
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(result.error || result.details || "Failed to place order");
     }
-  };
+  } catch (error) {
+    console.error("Error placing order:", error);
+    alert(`Order failed: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBackToCart = () => {
     navigate("/staff/cart", {
@@ -229,7 +245,7 @@ function Checkout() {
               </div>
             </div>
 
-            <div className="order-actions">
+            {/* <div className="order-actions">
               <button 
                 onClick={handleViewOrder}
                 className="view-order-btn"
@@ -242,7 +258,7 @@ function Checkout() {
               >
                 Create New Order
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </StaffMobileLayout>

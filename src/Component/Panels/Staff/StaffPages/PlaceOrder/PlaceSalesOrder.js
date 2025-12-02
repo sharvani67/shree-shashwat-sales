@@ -213,7 +213,7 @@ function PlaceSalesOrder() {
             <div className="staff-header-main">
               <button 
                 className="staff-back-btn"
-                onClick={() => navigate("/staff/my-retailers")}
+                onClick={() => navigate("/staff/retailers")}
               >
                 ← Back
               </button>
