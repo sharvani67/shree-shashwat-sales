@@ -77,9 +77,9 @@ function StaffOrders() {
           <h2 className="orders-m-section-title">
             Orders ({filteredOrders.length})
           </h2>
-          <p className="orders-m-section-subtitle">
+          {/* <p className="orders-m-section-subtitle">
             Includes invoice details and order items
-          </p>
+          </p> */}
 
           <div className="orders-m-list">
             {filteredOrders.map((order) => (
@@ -99,7 +99,7 @@ function StaffOrders() {
                 <div className="orders-m-info">
                   <p className="orders-m-amount">Amount: ₹ {order.order_total}</p>
                   <p className="orders-m-date">
-                    Invoice Date: {new Date(order.invoice_date).toLocaleDateString()}
+                    Order Date: {new Date(order.created_at).toLocaleDateString()}
                   </p>
                   <p className="orders-m-date">
                     Delivery Date: {new Date(order.estimated_delivery_date).toLocaleDateString()}

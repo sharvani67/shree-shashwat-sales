@@ -83,7 +83,7 @@ function Staff_expensive() {
               <div key={retailer.id} className="retailer-card">
                 <div className="retailer-header">
                   <h3>{retailer.category}</h3>
-                  <span className="retailer-id">ID: {retailer.id}</span>
+                  {/* <span className="retailer-id">ID: {retailer.id}</span> */}
                 </div>
 
                 <div className="retailer-contact">

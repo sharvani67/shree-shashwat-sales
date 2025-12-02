@@ -491,7 +491,7 @@
   transition: background-color 0.3s ease;
 
   display: block;     
-  margin: 0 auto;     
+  margin: 9px auto;     
 }
 .log-visit-btn:hover {
   background-color: #0056b3;

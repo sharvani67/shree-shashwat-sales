@@ -291,7 +291,7 @@ function SalesVisits() {
                     </div>
                     <div className="visit-retailer">
                       <div className="retailer-name">{visit.retailer_name}</div>
-                      <div className="retailer-id">ID: {visit.retailer_id}</div>
+                      {/* <div className="retailer-id">ID: {visit.retailer_id}</div> */}
                     </div>
                     <div className="visit-details">
                       <div className="detail-row">

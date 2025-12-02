@@ -87,7 +87,7 @@
 
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import StaffMobileLayout from "../StaffMobileLayout/StaffMobileLayout";
 import "./OrderFullDetails.css";
@@ -99,6 +99,7 @@ function OrderFullDetails() {
   const { orderNumber } = useParams();
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
@@ -147,15 +148,30 @@ function OrderFullDetails() {
     <StaffMobileLayout>
       <div className="orderfd-m-container">
         {/* HEADER */}
-        <div className="orderfd-m-header">
-          <div className="orderfd-m-header-top">
-            <h1><FiPackage /> Order Details</h1>
-            <div className="orderfd-m-order-number">
-              <span className="orderfd-m-order-badge">#{order.order_number}</span>
-            </div>
-          </div>
-          <p className="orderfd-m-subtitle">Complete order information and item breakdown</p>
-        </div>
+       <div className="orderfd-m-header">
+  <div className="orderfd-m-header-top">
+    {/* Back button added here */}
+    <button 
+      className="orderfd-m-back-btn"
+      onClick={() => navigate(-1)}
+      style={{ 
+        background: 'none', 
+        border: 'none', 
+        cursor: 'pointer',
+        marginRight: '10px',
+        fontSize: '1.2rem'
+      }}
+    >
+      ←
+    </button>
+    
+    <h1><FiPackage /> Order Details</h1>
+    <div className="orderfd-m-order-number">
+      <span className="orderfd-m-order-badge">#{order.order_number}</span>
+    </div>
+  </div>
+  <p className="orderfd-m-subtitle">Complete order information and item breakdown</p>
+</div>
 
         {/* ORDER SUMMARY */}
         <div className="orderfd-m-summary-card">
@@ -187,8 +203,8 @@ function OrderFullDetails() {
           
           <div className="orderfd-m-dates-grid">
             <div className="orderfd-m-date-item">
-              <span className="orderfd-m-date-label"><FiCalendar /> Invoice Date</span>
-              <span className="orderfd-m-date-value">{new Date(order.invoice_date).toLocaleDateString('en-IN', {
+              <span className="orderfd-m-date-label"><FiCalendar /> Order Date</span>
+              <span className="orderfd-m-date-value">{new Date(order.created_at).toLocaleDateString('en-IN', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
