@@ -491,7 +491,7 @@
   transition: background-color 0.3s ease;
 
   display: block;     
-  margin: 0 auto;     
+  margin: 9px auto;     
 }
 .log-visit-btn:hover {
   background-color: #0056b3;
@@ -511,4 +511,114 @@
   .amount {
     font-size: 16px;
   }
+}
+
+
+
+/* Mobile Text Buttons - No Icons */
+.card-actions-mobile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px; /* Better touch target for mobile */
+  text-align: center;
+}
+
+.edit-btn-text {
+  background: #e8f4ff;
+  color: #0066cc;
+  border: 2px solid #b3d9ff;
+}
+
+.edit-btn-text:active {
+  background: #cce5ff;
+  transform: scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0, 102, 204, 0.2);
+}
+
+.delete-btn-text {
+  background: #ffe6e6;
+  color: #cc0000;
+  border: 2px solid #ffb3b3;
+}
+
+.delete-btn-text:active {
+  background: #ffcccc;
+  transform: scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(204, 0, 0, 0.2);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 480px) {
+  .card-actions-mobile {
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 18px;
+  }
+  
+  .action-btn {
+    padding: 14px 6px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+  }
+}
+
+/* Small Mobile Screens */
+@media (max-width: 360px) {
+  .card-actions-mobile {
+    gap: 8px;
+  }
+  
+  .action-btn {
+    padding: 12px 4px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+}
+
+/* Very Small Screens */
+@media (max-width: 320px) {
+  .action-btn {
+    font-size: 14px;
+    padding: 10px 4px;
+  }
+}
+
+/* Ensure no hover effects on mobile (touch devices) */
+@media (hover: none) and (pointer: coarse) {
+  .action-btn:hover {
+    transform: none;
+  }
+  
+  .action-btn:active {
+    transform: scale(0.96);
+  }
+}
+
+@media (max-width: 740px) {
+    .header-text {
+        margin-top: -50px;
+     
+    }
+
+    .log-visit-btn{
+   text-align: center;
+    }
 }

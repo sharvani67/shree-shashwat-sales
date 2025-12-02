@@ -266,3 +266,38 @@
   font-size: 16px;
   font-weight: 600;
 }
+
+
+.orders-m-status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.orders-m-status-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.orders-m-status-badge.invoice {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.orders-m-status-badge.cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.orders-m-cancel-btn:hover:not(:disabled) {
+  background-color: #c82333 !important;
+  transform: translateY(-1px);
+  transition: all 0.2s;
+}
+
+.orders-m-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

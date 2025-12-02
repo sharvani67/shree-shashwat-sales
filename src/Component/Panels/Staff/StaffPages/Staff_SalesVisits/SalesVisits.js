@@ -291,7 +291,7 @@ function SalesVisits() {
                     </div>
                     <div className="visit-retailer">
                       <div className="retailer-name">{visit.retailer_name}</div>
-                      <div className="retailer-id">ID: {visit.retailer_id}</div>
+                      {/* <div className="retailer-id">ID: {visit.retailer_id}</div> */}
                     </div>
                     <div className="visit-details">
                       <div className="detail-row">
@@ -315,10 +315,14 @@ function SalesVisits() {
                         <span className="detail-value">{role}</span>
                       </div>
                     </div>
-                    <div className="card-actions">
-                      <button className="edit-icon" onClick={() => handleEditVisit(visit)}>✏️</button>
-                      <button className="delete-icon" onClick={() => handleDeleteVisit(visit)}>🗑️</button>
-                    </div>
+                   <div className="card-actions-mobile">
+  <button className="action-btn edit-btn-text" onClick={() => handleEditVisit(visit)}>
+    Edit
+  </button>
+  <button className="action-btn delete-btn-text" onClick={() => handleDeleteVisit(visit)}>
+    Delete
+  </button>
+</div>
                   </>
                 )}
               </div>

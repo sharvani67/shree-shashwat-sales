@@ -36,11 +36,11 @@ function StaffDashboard() {
               <div className="stat-change positive">+6 from last month</div>
             </div>
 
-            <div className="stat-card">
+            {/* <div className="stat-card">
               <h3>Avg. Visit Score</h3>
               <div className="stat-value">8.2/10</div>
               <div className="stat-change positive">+0.5 from last month</div>
-            </div>
+            </div> */}
           </div>
 
           {/* Recent Activity Section */}

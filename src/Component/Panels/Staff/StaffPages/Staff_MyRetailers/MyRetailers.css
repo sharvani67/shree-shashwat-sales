@@ -255,48 +255,49 @@
 } */
 
 
-.my-retailers-mobile {
-  padding: 20px;
+.my-retailers-container {
+  padding: 16px;
   background-color: #f5f5f5;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.page-header {
-  margin-bottom: 20px;
+.my-retailers-header {
+  margin-bottom: 16px;
 }
 
-.header-content {
+.my-retailers-header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 15px;
+  gap: 12px;
 }
 
-.header-text {
+.my-retailers-header-text {
   flex: 1;
 }
 
-.header-text h1 {
-  font-size: 24px;
+.my-retailers-header-text h1 {
+  font-size: 22px;
   font-weight: 700;
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
   color: #000;
 }
 
-.header-text p {
-  font-size: 14px;
+.my-retailers-header-text p {
+  font-size: 13px;
   color: #666;
   margin: 0;
+  line-height: 1.3;
 }
 
-.add-retailer-btn-top {
+.my-retailers-add-btn {
   background: #007bff;
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 10px 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -305,307 +306,438 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  min-height: 40px;
 }
 
-.add-retailer-btn-top:hover {
+.my-retailers-add-btn:hover {
   background: #0056b3;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
-.search-section {
-  margin-bottom: 20px;
+.my-retailers-search-section {
+  margin-bottom: 16px;
 }
 
-.search-bar {
+.my-retailers-search-bar {
   width: 100%;
 }
 
-.search-input {
+.my-retailers-search-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 15px;
   background-color: white;
   box-sizing: border-box;
 }
 
-.search-input:focus {
+.my-retailers-search-input:focus {
   outline: none;
   border-color: #888;
 }
 
-.search-input::placeholder {
+.my-retailers-search-input::placeholder {
   color: #999;
 }
 
-.retailers-section {
-  margin-bottom: 20px;
+.my-retailers-list-section {
+  margin-bottom: 16px;
 }
 
-.section-header h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 5px 0;
-  color: #000;
-}
-
-.section-header p {
-  font-size: 13px;
-  color: #666;
-  margin: 0 0 15px 0;
-}
-
-.retailers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.retailer-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
-}
-
-.retailer-header {
-  margin-bottom: 12px;
-}
-
-.retailer-header h3 {
-  font-size: 16px;
+.my-retailers-section-header h2 {
+  font-size: 17px;
   font-weight: 600;
   margin: 0 0 4px 0;
   color: #000;
 }
 
-.retailer-id {
+.my-retailers-section-header p {
   font-size: 12px;
   color: #666;
-  background: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: inline-block;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
 }
 
-.retailer-contact {
-  margin-bottom: 12px;
-  padding-bottom: 12px;
+.my-retailers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-retailer-card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  margin-bottom: 2px;
+}
+
+.my-retailer-card-header {
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.my-retailer-card-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 2px 0;
+  color: #000;
+}
+
+.my-retailer-business {
+  font-size: 12px;
+  color: #666;
+  padding: 2px 0;
+}
+
+.my-retailer-contact {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-.contact-phone,
-.contact-email {
-  font-size: 14px;
+.my-retailer-phone,
+.my-retailer-email {
+  font-size: 13px;
   color: #333;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.contact-icon {
-  font-size: 12px;
+.my-retailer-contact-icon {
+  font-size: 11px;
   opacity: 0.7;
+  flex-shrink: 0;
 }
 
-.retailer-extra {
-  margin-bottom: 16px;
+.my-retailer-details {
+  margin-bottom: 12px;
 }
 
-.info-row {
+.my-retailer-detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #f8f8f8;
+  padding: 4px 0;
 }
 
-.info-row:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
-.info-label {
-  font-size: 13px;
+.my-retailer-detail-label {
+  font-size: 12px;
   color: #666;
   font-weight: 500;
-  min-width: 70px;
+  min-width: 60px;
 }
 
-.info-value {
-  font-size: 13px;
+.my-retailer-detail-value {
+  font-size: 12px;
   color: #000;
   font-weight: 500;
   text-align: right;
   flex: 1;
-  padding-left: 10px;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-badge.active {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status-badge.inactive {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.status-badge.pending {
-  background: #fff3cd;
-  color: #856404;
+  padding-left: 8px;
 }
 
 /* Button Row - Both buttons in same row */
-.retailer-actions {
+.my-retailer-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 10px;
+  /* border-top: 1px solid #f0f0f0; */
 }
 
-.place-order-btn,
-.view-details-btn {
+.my-retailer-order-btn,
+.my-retailer-details-btn {
   flex: 1;
-  padding: 12px 8px;
+  padding: 10px 6px;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 44px;
+  gap: 5px;
+  min-height: 40px;
+  line-height: 1.2;
 }
 
-.place-order-btn {
+.my-retailer-order-btn {
   background: #28a745;
   color: white;
 }
 
-.place-order-btn:hover {
+.my-retailer-order-btn:hover {
   background: #218838;
   transform: translateY(-1px);
 }
 
-.view-details-btn {
+.my-retailer-details-btn {
   background: #6c757d;
   color: white;
 }
 
-.view-details-btn:hover {
+.my-retailer-details-btn:hover {
   background: #545b62;
   transform: translateY(-1px);
 }
 
-.btn-icon {
-  font-size: 14px;
+.my-retailer-btn-icon {
+  font-size: 13px;
+  flex-shrink: 0;
 }
 
-.loading-text {
+.my-retailers-loading {
   text-align: center;
-  padding: 20px;
+  padding: 16px;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   background: white;
   border-radius: 8px;
   border: 1px solid #f0f0f0;
+  margin: 0;
 }
 
-.error-text {
+.my-retailers-error {
   text-align: center;
-  padding: 20px;
+  padding: 16px;
   color: #dc3545;
-  font-size: 14px;
+  font-size: 13px;
   background: #f8d7da;
   border-radius: 8px;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
-.empty-text {
+.my-retailers-empty {
   text-align: center;
-  padding: 30px;
+  padding: 24px;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   background: white;
   border-radius: 8px;
   border: 1px dashed #e0e0e0;
+  margin: 0;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-  .header-content {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  
-  .add-retailer-btn-top {
-    align-self: flex-end;
-    width: auto;
-  }
-  
-  .retailer-actions {
-    gap: 8px;
-  }
-  
-  .place-order-btn,
-  .view-details-btn {
-    font-size: 12px;
-    padding: 10px 6px;
-  }
-
-  .new-style{
-    background: none;
-  }
-
-}
-
-@media (max-width: 360px) {
-  .my-retailers-mobile {
-    padding: 15px;
-  }
-  
-  .retailer-card {
+  .my-retailers-container {
     padding: 12px;
   }
   
-  .add-retailer-btn-top {
-    padding: 8px 12px;
-    font-size: 13px;
+  .my-retailers-header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
   
-  .btn-icon {
+  .my-retailers-add-btn {
+    align-self: flex-end;
+    width: auto;
+    padding: 8px 12px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+  
+  .my-retailer-actions {
+    gap: 8px;
+  }
+  
+  .my-retailer-order-btn,
+  .my-retailer-details-btn {
+    font-size: 14px;
+    padding: 8px 5px;
+    min-height: 36px;
+  }
+
+  .my-retailer-card {
+    padding: 12px;
+  }
+
+  .my-retailer-card-header h3 {
+    font-size: 14px;
+  }
+
+  .my-retailer-phone,
+  .my-retailer-email {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .my-retailers-container {
+    padding: 10px;
+  }
+  
+  .my-retailer-card {
+    padding: 10px;
+  }
+  
+  .my-retailers-add-btn {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+  
+  .my-retailer-btn-icon {
     display: none; /* Hide icons on very small screens */
   }
   
-  .info-row {
+  .my-retailer-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 2px 0;
+  }
+  
+  .my-retailer-detail-value {
+    text-align: left;
+    padding-left: 0;
+  }
+}
+
+
+/* Add to your existing CSS file */
+
+.my-retailer-card-header {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-retailer-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.my-retailer-header-text {
+  flex: 1;
+  min-width: 0; /* Important for text truncation */
+}
+
+.my-retailer-card-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 2px 0;
+  color: #000;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.my-retailer-business {
+  font-size: 12px;
+  color: #666;
+  padding: 2px 0;
+  line-height: 1.3;
+}
+
+.my-retailer-action-icons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0; /* Prevent icons from shrinking */
+  align-items: flex-start;
+  padding-top: 2px; /* Align with text better */
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-btn:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+}
+
+.edit-retailer-btn:hover {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.delete-retailer-btn:hover {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.delete-retailer-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* For very long retailer names - text truncation */
+.my-retailer-header-text {
+  overflow: hidden;
+}
+
+.my-retailer-card-header h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .my-retailer-header-content {
+    gap: 8px;
+  }
+  
+  .my-retailer-action-icons {
+    gap: 6px;
+  }
+  
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    padding: 5px;
+  }
+  
+  .my-retailer-card-header h3 {
+    font-size: 14px;
+  }
+  
+  .my-retailer-business {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .my-retailer-header-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
   
-  .info-value {
-    text-align: left;
-    padding-left: 0;
+  .my-retailer-action-icons {
+    align-self: flex-end;
+  }
+  
+  .my-retailer-card-header h3 {
+    white-space: normal; /* Allow wrapping on very small screens */
   }
 }

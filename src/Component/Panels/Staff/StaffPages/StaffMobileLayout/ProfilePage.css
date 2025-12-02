@@ -1,180 +1,185 @@
+/* Mobile Profile Page */
 .profile-page {
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: 0;
+  background-color: #f8f9fa;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Header Section */
-.profile-header-section {
+/* Header */
+.profile-header-mobile {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 16px 20px;
   background: white;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.back-button {
+.back-button-mobile {
   background: none;
   border: none;
   color: #007bff;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
-  cursor: pointer;
   padding: 8px 0;
-  min-width: 60px;
+  cursor: pointer;
+  min-width: 70px;
+  text-align: left;
 }
 
-.back-button:hover {
-  color: #0056b3;
+.back-button-mobile:active {
+  opacity: 0.7;
 }
 
-.profile-header-section h1 {
+.profile-title {
   font-size: 20px;
   font-weight: 700;
-  margin: 0;
-  color: #000;
+  margin: 0 auto;
+  color: #1a1a1a;
   text-align: center;
-  flex: 1;
-}
-
-.profile-role {
-  background: #007bff;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-width: 60px;
-  text-align: center;
+  padding-right: 70px;
 }
 
 /* Profile Card */
-.profile-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+.profile-card-mobile {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 20px;
+  border-radius: 16px;
+  padding: 24px 20px;
   text-align: center;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
 }
 
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+.profile-avatar-mobile {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 15px;
+  margin: 0 auto 18px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
 }
 
-.avatar-icon {
-  font-size: 40px;
+.avatar-icon-mobile {
+  font-size: 45px;
   color: white;
 }
 
-.profile-basic-info h2 {
-  font-size: 20px;
+.profile-info-mobile {
+  color: white;
+}
+
+.profile-name {
+  font-size: 22px;
   font-weight: 700;
-  margin: 0 0 5px 0;
-  color: #000;
-}
-
-.profile-email {
-  font-size: 14px;
-  color: #666;
   margin: 0 0 8px 0;
+  color: white;
+  line-height: 1.3;
 }
 
-.profile-id {
-  font-size: 12px;
-  color: #888;
-  background: #f8f9fa;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-/* Profile Details Sections */
-.profile-details-sections {
-  margin-bottom: 20px;
-}
-
-.details-section {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 15px 0;
-  color: #000;
+.profile-email-mobile {
+  font-size: 15px;
+  margin: 0 0 6px 0;
+  opacity: 0.9;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #f0f0f0;
+  flex-wrap: wrap;
 }
 
-.section-icon {
+.profile-id-mobile {
   font-size: 14px;
-  color: #007bff;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
 }
 
-/* Info Grid */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+.icon-small {
+  font-size: 14px;
+  opacity: 0.9;
 }
 
-.info-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #f8f8f8;
+/* Profile Sections */
+.profile-sections-mobile {
+  padding: 0 20px 30px;
 }
 
-.info-item:last-child {
+.section-mobile {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.section-title-mobile {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  padding: 18px 20px;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.section-icon-mobile {
+  font-size: 16px;
+  color: #667eea;
+}
+
+/* Info List */
+.info-list-mobile {
+  padding: 0 20px;
+}
+
+.info-row-mobile {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.info-row-mobile:last-child {
   border-bottom: none;
 }
 
-.info-item.full-width {
-  grid-column: 1 / -1;
-}
-
-.info-label {
-  font-size: 12px;
-  color: #666;
-  font-weight: 500;
+.info-label-mobile {
+  font-size: 13px;
+  color: #718096;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.info-value {
-  font-size: 14px;
-  color: #000;
+.info-value-mobile {
+  font-size: 16px;
+  color: #1a202c;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
-  word-break: break-word;
+  gap: 10px;
+  line-height: 1.4;
 }
 
-.value-icon {
-  font-size: 12px;
-  color: #007bff;
+.icon-inline {
+  font-size: 14px;
+  color: #667eea;
+  min-width: 16px;
 }
 
 /* Loading and Error States */
@@ -185,62 +190,130 @@
   align-items: center;
   justify-content: center;
   min-height: 300px;
+  padding: 40px 20px;
   text-align: center;
 }
 
 .loading-container p,
 .error-container p {
-  font-size: 16px;
-  color: #666;
+  font-size: 17px;
+  color: #4a5568;
   margin-bottom: 20px;
 }
 
 .back-btn {
-  background: #007bff;
+  background: #667eea;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-size: 14px;
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.back-btn:hover {
-  background: #0056b3;
+.back-btn:active {
+  background: #5a67d8;
+  transform: scale(0.98);
 }
 
-/* Responsive */
-@media (min-width: 480px) {
-  .info-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* Mobile Responsive */
 @media (max-width: 360px) {
-  .profile-page {
-    padding: 15px;
+  .profile-header-mobile {
+    padding: 14px 16px;
   }
   
-  .profile-header-section {
-    padding: 12px;
-  }
-  
-  .profile-header-section h1 {
+  .profile-title {
     font-size: 18px;
+    padding-right: 60px;
   }
   
-  .profile-avatar {
+  .back-button-mobile {
+    font-size: 16px;
+    min-width: 60px;
+  }
+  
+  .profile-card-mobile {
+    margin: 16px;
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+  
+  .profile-avatar-mobile {
+    width: 80px;
+    height: 80px;
+    border-width: 3px;
+  }
+  
+  .avatar-icon-mobile {
+    font-size: 40px;
+  }
+  
+  .profile-name {
+    font-size: 20px;
+  }
+  
+  .profile-sections-mobile {
+    padding: 0 16px 24px;
+  }
+  
+  .section-mobile {
+    border-radius: 14px;
+  }
+  
+  .section-title-mobile {
+    font-size: 16px;
+    padding: 16px;
+  }
+  
+  .info-list-mobile {
+    padding: 0 16px;
+  }
+  
+  .info-row-mobile {
+    padding: 14px 0;
+  }
+  
+  .info-label-mobile {
+    font-size: 12px;
+  }
+  
+  .info-value-mobile {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 320px) {
+  .profile-card-mobile {
+    margin: 12px;
+    padding: 18px 14px;
+  }
+  
+  .profile-avatar-mobile {
     width: 70px;
     height: 70px;
   }
   
-  .avatar-icon {
+  .avatar-icon-mobile {
     font-size: 35px;
   }
   
-  .profile-basic-info h2 {
+  .profile-name {
     font-size: 18px;
+  }
+  
+  .profile-email-mobile,
+  .profile-id-mobile {
+    font-size: 13px;
+  }
+  
+  .section-title-mobile {
+    font-size: 15px;
+  }
+  
+  .info-value-mobile {
+    font-size: 14px;
   }
 }

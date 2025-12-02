@@ -115,7 +115,7 @@ const handlePlaceOrder = async () => {
       tax_amount: 0,
       net_payable: finalTotals.finalTotal,
       credit_period: cartItems[0]?.credit_period || 0,
-      estimated_delivery_date: new Date().toISOString().split('T')[0],
+      estimated_delivery_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
       order_placed_by: actualStaffId, // Staff ID
       order_mode: "KACHA",
       // Note: remove staff_id if not in your orders table schema

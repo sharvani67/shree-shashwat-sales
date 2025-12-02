@@ -4,12 +4,13 @@ import StaffMobileLayout from "../StaffMobileLayout/StaffMobileLayout";
 import "./Staff_orders.css";
 import { useNavigate } from "react-router-dom";
 import { baseurl } from "../../../../BaseURL/BaseURL";
+import { toast } from "react-toastify";
 
 function StaffOrders() {
   const [orders, setOrders] = useState([]);
   const [itemsByOrder, setItemsByOrder] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState({});
+  const [loadingCancel, setLoadingCancel] = useState({});
   const navigate = useNavigate();
   const user = localStorage.getItem("user");
   const orderplacedbyID = user ? JSON.parse(user).id : null;
@@ -31,7 +32,7 @@ function StaffOrders() {
 
           setItemsByOrder((prev) => ({
             ...prev,
-            [order.order_number]: detailRes.data.items, // store items
+            [order.order_number]: detailRes.data.items,
           }));
         });
       } catch (error) {
@@ -42,12 +43,14 @@ function StaffOrders() {
     fetchOrders();
   }, []);
 
-  const handleCancelOrder = async (orderNumber) => {
-    if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) {
+  const handleCancelOrder = async (orderNumber, e) => {
+    e.stopPropagation(); // Prevent card click event
+    
+    if (!window.confirm("Are you sure you want to cancel this order?")) {
       return;
     }
 
-    setLoading(prev => ({ ...prev, [orderNumber]: true }));
+    setLoadingCancel(prev => ({ ...prev, [orderNumber]: true }));
 
     try {
       const response = await axios.put(
@@ -55,32 +58,52 @@ function StaffOrders() {
       );
 
       if (response.data.success) {
-        // Update the order status in local state
-        setOrders(prevOrders => 
-          prevOrders.map(order => 
-            order.order_number === orderNumber 
-              ? { ...order, invoice_status: 2 } 
+        // Update the order in local state
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order.order_number === orderNumber
+              ? { ...order, order_status: 'Cancelled' }
               : order
           )
         );
         
-        alert("Order cancelled successfully!");
+        toast.success("Order cancelled successfully!");
       }
     } catch (error) {
       console.error("Error cancelling order:", error);
-      alert(error.response?.data?.error || "Failed to cancel order. Please try again.");
+      toast.error(error.response?.data?.error || "Failed to cancel order");
     } finally {
-      setLoading(prev => ({ ...prev, [orderNumber]: false }));
+      setLoadingCancel(prev => ({ ...prev, [orderNumber]: false }));
     }
   };
 
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 0: return { text: "Pending", className: "pending" };
-      case 1: return { text: "Invoiced", className: "invoiced" };
-      case 2: return { text: "Cancelled", className: "cancelled" };
-      default: return { text: "Unknown", className: "unknown" };
+  // Helper function to determine display status
+  const getDisplayStatus = (order) => {
+    // If cancelled, show cancelled
+    if (order.order_status === 'Cancelled') {
+      return 'Cancelled';
     }
+    
+    // If invoice is generated (invoice_status = 1), show Invoice
+    if (order.invoice_status === 1) {
+      return 'Invoiced';
+    }
+    
+    // Default to Pending
+    return 'Pending';
+  };
+
+  // Helper function to determine if cancel button should be shown
+  const shouldShowCancelButton = (order) => {
+    // Don't show if already cancelled
+    if (order.order_status === 'Cancelled') return false;
+    
+    // Only show if invoice_status is 0 AND order_status is not Invoice
+    if (order.invoice_status === 0 && order.order_status !== 'Invoice') {
+      return true;
+    }
+    
+    return false;
   };
 
   const filteredOrders = orders.filter((order) =>
@@ -120,8 +143,8 @@ function StaffOrders() {
 
           <div className="orders-m-list">
             {filteredOrders.map((order) => {
-              const statusInfo = getStatusBadge(order.invoice_status);
-              const canCancel = order.invoice_status === 0;
+              const displayStatus = getDisplayStatus(order);
+              const showCancelButton = shouldShowCancelButton(order);
               
               return (
                 <div
@@ -132,11 +155,62 @@ function StaffOrders() {
                 >
                   {/* Order Header */}
                   <div className="orders-m-card-header">
-                    <div className="orders-m-header-top">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <h3>{order.order_number}</h3>
-                      <span className={`orders-m-status ${statusInfo.className}`}>
-                        {statusInfo.text}
-                      </span>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        {/* Order Status Badge */}
+                        <span 
+                          className={`orders-m-status-badge ${
+                            displayStatus === 'Cancelled' ? 'cancelled' : 
+                            displayStatus === 'Invoiced' ? 'invoice' : 'pending'
+                          }`}
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            backgroundColor: 
+                              displayStatus === 'Cancelled' ? '#f8d7da' :
+                              displayStatus === 'Invoiced' ? '#d4edda' : '#fff3cd',
+                            color: 
+                              displayStatus === 'Cancelled' ? '#721c24' :
+                              displayStatus === 'Invoiced' ? '#155724' : '#856404'
+                          }}
+                        >
+                          {displayStatus}
+                        </span>
+                        
+                        {/* Cancel Button */}
+                        {showCancelButton && (
+                          <button
+                            className="orders-m-cancel-btn"
+                            onClick={(e) => handleCancelOrder(order.order_number, e)}
+                            disabled={loadingCancel[order.order_number]}
+                            style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                          >
+                            {loadingCancel[order.order_number] ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Cancelling...
+                              </>
+                            ) : (
+                              'Cancel Order'
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -144,15 +218,16 @@ function StaffOrders() {
                   <div className="orders-m-info">
                     <p className="orders-m-amount">Amount: ₹ {order.order_total}</p>
                     <p className="orders-m-date">
-                      Invoice Date: {order.invoice_date 
-                        ? new Date(order.invoice_date).toLocaleDateString() 
-                        : "Not generated"}
+                      Invoice Date: {order.invoice_date ? new Date(order.invoice_date).toLocaleDateString() : 'Not Generated'}
                     </p>
                     <p className="orders-m-date">
                       Delivery Date: {new Date(order.estimated_delivery_date).toLocaleDateString()}
                     </p>
                     <p className="orders-m-credit">
                       Customer: {order.customer_name} 
+                    </p>
+                    <p className="orders-m-invoice-status">
+                      Invoice Status: {order.invoice_status === 1 ? 'Generated' : 'Not Generated'}
                     </p>
                   </div>
 
@@ -178,18 +253,27 @@ function StaffOrders() {
                     )}
                   </div>
 
-                  {/* Cancel Button (only if invoice_status is 0) */}
-                  {canCancel && (
-                    <div className="orders-m-footer" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        className="orders-m-cancel-btn"
-                        onClick={() => handleCancelOrder(order.order_number)}
-                        disabled={loading[order.order_number]}
-                      >
-                        {loading[order.order_number] ? "Cancelling..." : "Cancel Order"}
-                      </button>
-                    </div>
-                  )}
+                  {/* Footer Status */}
+                  <div className="orders-m-footer">
+                    {displayStatus === 'Cancelled' && (
+                      <span style={{
+                        color: '#dc3545',
+                        fontWeight: 'bold',
+                        fontSize: '14px'
+                      }}>
+                        ❌ Order Cancelled
+                      </span>
+                    )}
+                    {displayStatus === 'Invoiced' && order.invoice_number && (
+                      <span style={{
+                        color: '#155724',
+                        fontWeight: 'bold',
+                        fontSize: '14px'
+                      }}>
+                        ✅ Invoice: {order.invoice_number}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
