@@ -315,10 +315,14 @@ function SalesVisits() {
                         <span className="detail-value">{role}</span>
                       </div>
                     </div>
-                    <div className="card-actions">
-                      <button className="edit-icon" onClick={() => handleEditVisit(visit)}>✏️</button>
-                      <button className="delete-icon" onClick={() => handleDeleteVisit(visit)}>🗑️</button>
-                    </div>
+                   <div className="card-actions-mobile">
+  <button className="action-btn edit-btn-text" onClick={() => handleEditVisit(visit)}>
+    Edit
+  </button>
+  <button className="action-btn delete-btn-text" onClick={() => handleDeleteVisit(visit)}>
+    Delete
+  </button>
+</div>
                   </>
                 )}
               </div>

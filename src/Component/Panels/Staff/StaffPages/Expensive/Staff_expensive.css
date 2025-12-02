@@ -238,6 +238,7 @@
   .add-retailer-btn-top {
     align-self: flex-end;
     width: auto;
+    margin-bottom: 10px;
   }
 }
 
