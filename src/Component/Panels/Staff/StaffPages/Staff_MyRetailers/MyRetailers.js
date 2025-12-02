@@ -341,6 +341,7 @@ function MyRetailers() {
   const [retailers, setRetailers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   /** -----------------------------
    *  Get logged-in user
@@ -351,7 +352,8 @@ function MyRetailers() {
   const staffId = user?.id || null;
   const role = user?.role || null;
 
-  useEffect(() => {
+  // Fetch retailers function
+  const fetchRetailers = () => {
     if (!staffId || role !== "staff") return;
 
     setLoading(true);
@@ -376,6 +378,10 @@ function MyRetailers() {
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchRetailers();
   }, [staffId, role]);
 
   /** -----------------------------
@@ -387,17 +393,61 @@ function MyRetailers() {
     retailer.shipping_city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  /** -----------------------------
+   *  Handle Operations
+   * ----------------------------- */
   const handleAddRetailer = () => navigate("/staff/add-retailer");
 
+  const handleEditRetailer = (retailerId) => {
+    navigate(`/staff/edit-retailer/${retailerId}`);
+  };
+
+  const handleDeleteRetailer = async (retailerId, retailerName) => {
+    if (!window.confirm(`Are you sure you want to delete ${retailerName}?`)) {
+      return;
+    }
+
+    try {
+      setDeletingId(retailerId);
+      
+      const storedData = localStorage.getItem("user");
+      const user = storedData ? JSON.parse(storedData) : null;
+      const token = localStorage.getItem("token") || "";
+
+      const response = await fetch(`${baseurl}/accounts/${retailerId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Retailer deleted successfully!");
+        // Refresh the retailers list
+        fetchRetailers();
+      } else {
+        alert(result.error || "Failed to delete retailer");
+      }
+    } catch (err) {
+      console.error("Error deleting retailer:", err);
+      alert("Failed to delete retailer. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const handlePlaceOrder = (retailerId, discount, retailerName) => {
-  navigate("/staff/place-sales-order", { 
-    state: { 
-      retailerId, 
-      discount,
-      customerName: retailerName 
-    } 
-  });
-};
+    navigate("/staff/place-sales-order", { 
+      state: { 
+        retailerId, 
+        discount,
+        customerName: retailerName 
+      } 
+    });
+  };
 
   const handleViewDetails = (retailerId) => {
     navigate(`/staff/view-retailers/${retailerId}`);
@@ -408,7 +458,7 @@ function MyRetailers() {
       <div className="my-retailers-mobile">
 
         {/* 🔹 Header */}
-        <div className="page-header1  new-style">
+        <div className="page-header1 new-style">
           <div className="header-content">
             <div className="header-text">
               <h1>My Retailers</h1>
@@ -456,11 +506,28 @@ function MyRetailers() {
             {filteredRetailers.map((retailer) => (
               <div key={retailer.id} className="retailer-card">
                 
-                {/* Header Section */}
+                {/* Header Section with Edit/Delete Icons */}
                 <div className="retailer-header">
                   <div>
                     <h3>{retailer.name}</h3>
                     <div className="retailer-id">ID: {retailer.id || "—"}</div>
+                  </div>
+                  <div className="action-icons">
+                    <button 
+                      className="icon-btn edit-retailer-btn"
+                      onClick={() => handleEditRetailer(retailer.id)}
+                      title="Edit Retailer"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="icon-btn delete-retailer-btn"
+                      onClick={() => handleDeleteRetailer(retailer.id, retailer.name)}
+                      disabled={deletingId === retailer.id}
+                      title="Delete Retailer"
+                    >
+                      {deletingId === retailer.id ? "⏳" : "🗑️"}
+                    </button>
                   </div>
                 </div>
 
@@ -492,13 +559,17 @@ function MyRetailers() {
                       </span>
                     </span>
                   </div>
+                  <div className="info-row">
+                    <span className="info-label">Discount:</span>
+                    <span className="info-value">{retailer.discount || 0}%</span>
+                  </div>
                 </div>
 
                 {/* Button Row - Both buttons in same row */}
                 <div className="retailer-actions">
                   <button 
                     className="place-order-btn"
-                    onClick={() => handlePlaceOrder(retailer.id,retailer.discount, retailer.name)}
+                    onClick={() => handlePlaceOrder(retailer.id, retailer.discount, retailer.name)}
                   >
                     <span className="btn-icon">🛒</span> Place Order
                   </button>

@@ -208,7 +208,9 @@ function App() {
         <Route path="/staff/retailers" element={<MyRetailers />} />
                 <Route path="/staff/view-retailers/:id" element={<ViewDetails />} />
 <Route path="/staff/profile" element={<ProfilePage />} />
-        <Route path="/staff/add-retailer" element={<AddRetailer />} />
+        <Route path="/staff/add-retailer" element={<AddRetailer mode="add" />} />
+        <Route path="/staff/edit-retailer/:id" element={<AddRetailer mode="edit" />} />
+        <Route path="/staff/view-retailer/:id" element={<AddRetailer mode="view" />} />
         <Route path="/staff/sales-visits" element={<SalesVisits />} />
         <Route path="/staff/log-visit" element={<LogVisit />} />
         <Route path="/staff/expences" element={<StaffExpenses />} />

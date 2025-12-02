@@ -418,9 +418,17 @@ function AddRetailer({ mode = "add" }) {
     );
   };
 
-  const getTitle = () => {
-    return "Add New Retailer";
-  };
+ // In AddRetailer component, update the getTitle function:
+const getTitle = () => {
+  if (mode === "edit") return "Edit Retailer";
+  if (mode === "view") return "View Retailer";
+  return "Add New Retailer";
+};
+
+// Update the submit button text in the billing tab:
+<button type="submit" className="submit-btn bank-button">
+  {mode === "edit" ? "Update Retailer" : "Add Retailer"}
+</button>
 
   const renderActiveTab = () => {
     if (loading || loadingGroups) {
