@@ -14,6 +14,9 @@ function PlaceSalesOrder() {
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [retailerInfo, setRetailerInfo] = useState({});
+  const [categoriesList, setCategoriesList] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   // Get retailer ID and discount from navigation state
   const retailerId = location.state?.retailerId;
@@ -24,6 +27,60 @@ function PlaceSalesOrder() {
   const storedData = localStorage.getItem("user");
   const user = storedData ? JSON.parse(storedData) : null;
   const staffId = user?.id || null;
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await fetch(`${baseurl}/categories`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Map the API response to match your Category type
+        const mappedCategories = data.map((category) => ({
+          id: category.id.toString(),
+          name: category.category_name,
+          discount: category.discount,
+          discountEndDate: category.discount_end_date,
+          icon: getCategoryIcon(category.category_name),
+        }));
+        
+        setCategoriesList(mappedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategoriesList([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Helper function to assign icons based on category names
+  const getCategoryIcon = (categoryName) => {
+    const iconMap = {
+      'Home Accessories': '🏠',
+      'Snacks': '🍪',
+      'Kitchen': '🔪',
+      'Laptops': '💻',
+      'Mobile': '📱',
+      'Rice': '🍚',
+      'Pulses': '🫘',
+      'Oils': '🛢️',
+      'Grains': '🌾',
+      'Spices': '🌶️',
+      'Sugar': '🧂',
+      'Beverages': '☕',
+    };
+    
+    return iconMap[categoryName] || '📦'; // Default icon
+  };
 
   // Fetch cart items on load (just to get count)
   useEffect(() => {
@@ -114,12 +171,25 @@ function PlaceSalesOrder() {
     fetchSalesProducts();
   }, []);
 
-  // Filter products based on search
-  const filteredProducts = products.filter(product =>
-    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.supplier?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter products based on search AND category
+  const filteredProducts = products.filter(product => {
+    // Filter by category
+    const matchesCategory = selectedCategory === 'all' || 
+      (product.category_id && product.category_id.toString() === selectedCategory) ||
+      (product.category && product.category.toLowerCase() === categoriesList.find(cat => cat.id === selectedCategory)?.name?.toLowerCase());
+    
+    // If no search term, only filter by category
+    if (!searchTerm.trim()) return matchesCategory;
+    
+    // Filter by search term
+    const query = searchTerm.toLowerCase().trim();
+    const matchesSearch = 
+      product.name?.toLowerCase().includes(query) ||
+      product.category?.toLowerCase().includes(query) ||
+      product.supplier?.toLowerCase().includes(query);
+    
+    return matchesCategory && matchesSearch;
+  });
 
   // Add product to cart via backend
   const addToCart = async (product) => {
@@ -243,6 +313,49 @@ function PlaceSalesOrder() {
           </div>
         </div>
 
+        {/* Category Slider - ADDED ABOVE SEARCH */}
+        <div className="category-slider-container">
+          <div className="category-slider">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`category-chip ${
+                selectedCategory === 'all'
+                  ? 'category-chip-active'
+                  : 'category-chip-inactive'
+              }`}
+            >
+              All
+            </button>
+            
+            {categoriesLoading ? (
+              <div className="categories-loading">
+                {[1, 2, 3, 4].map((item) => (
+                  <div
+                    key={item}
+                    className="category-chip category-chip-loading"
+                  >
+                    <span className="invisible">Loading...</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              categoriesList.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`category-chip ${
+                    selectedCategory === category.id
+                      ? 'category-chip-active'
+                      : 'category-chip-inactive'
+                  }`}
+                >
+                  {category.icon} {category.name}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Search Section */}
         <div className="staff-search-section">
           <input
@@ -252,21 +365,89 @@ function PlaceSalesOrder() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="staff-search-input"
           />
+          
+          {/* Search Results Summary */}
+          {searchTerm && (
+            <div className="search-results-summary">
+              <div className="search-summary-content">
+                <p className="search-results-count">
+                  {filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'} for "{searchTerm}"
+                </p>
+                {filteredProducts.length === 0 && products.length > 0 && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="clear-search-btn"
+                  >
+                    Clear search
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Category Display */}
+        {/* {selectedCategory !== 'all' && (
+          <div className="selected-category-info">
+            <p>
+              Showing products in: <strong>
+                {categoriesList.find(cat => cat.id === selectedCategory)?.name || selectedCategory}
+              </strong>
+            </p>
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className="view-all-categories-btn"
+            >
+              View All Categories
+            </button>
+          </div>
+        )} */}
 
         {/* Main Content */}
         <div className="staff-order-content">
           
           {/* Products Section */}
           <div className="staff-products-section">
-            <h2>Available Products ({filteredProducts.length})</h2>
+            <h2>
+              Available Products ({filteredProducts.length})
+              {selectedCategory !== 'all' && (
+                <span className="category-filter-indicator">
+                  in {categoriesList.find(cat => cat.id === selectedCategory)?.name || selectedCategory}
+                </span>
+              )}
+            </h2>
             
             {loading && <p className="staff-loading">Loading products...</p>}
             {error && <p className="staff-error">{error}</p>}
             
             <div className="staff-products-grid">
               {!loading && filteredProducts.length === 0 && !error && (
-                <p className="staff-no-products">No products found matching your search.</p>
+                <div className="staff-no-products">
+                  <p>No products found</p>
+                  {searchTerm ? (
+                    <p className="no-results-detail">
+                      No results for "{searchTerm}" in {selectedCategory === 'all' ? 'all categories' : 'this category'}
+                    </p>
+                  ) : (
+                    <p className="no-results-detail">Try selecting a different category</p>
+                  )}
+                  <div className="no-results-actions">
+                    <button
+                      onClick={() => setSelectedCategory('all')}
+                      className="action-btn primary-action"
+                    >
+                      View All Products
+                    </button>
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="action-btn secondary-action"
+                      >
+                        Clear Search
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
               
               {!loading && filteredProducts.map(product => (
