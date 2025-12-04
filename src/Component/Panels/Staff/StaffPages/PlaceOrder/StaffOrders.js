@@ -153,64 +153,18 @@ function StaffOrders() {
                   onClick={() => navigate(`/staff/order-details/${order.order_number}`)}
                   style={{ cursor: "pointer" }}
                 >
-                  {/* Order Header */}
+                  {/* Order Header - Now with order number and status on same line */}
                   <div className="orders-m-card-header">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h3>{order.order_number}</h3>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        {/* Order Status Badge */}
-                        <span 
-                          className={`orders-m-status-badge ${
-                            displayStatus === 'Cancelled' ? 'cancelled' : 
-                            displayStatus === 'Invoiced' ? 'invoice' : 'pending'
-                          }`}
-                          style={{
-                            padding: '4px 12px',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            backgroundColor: 
-                              displayStatus === 'Cancelled' ? '#f8d7da' :
-                              displayStatus === 'Invoiced' ? '#d4edda' : '#fff3cd',
-                            color: 
-                              displayStatus === 'Cancelled' ? '#721c24' :
-                              displayStatus === 'Invoiced' ? '#155724' : '#856404'
-                          }}
-                        >
-                          {displayStatus}
-                        </span>
-                        
-                        {/* Cancel Button */}
-                        {showCancelButton && (
-                          <button
-                            className="orders-m-cancel-btn"
-                            onClick={(e) => handleCancelOrder(order.order_number, e)}
-                            disabled={loadingCancel[order.order_number]}
-                            style={{
-                              padding: '6px 12px',
-                              backgroundColor: '#dc3545',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '5px'
-                            }}
-                          >
-                            {loadingCancel[order.order_number] ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                Cancelling...
-                              </>
-                            ) : (
-                              'Cancel Order'
-                            )}
-                          </button>
-                        )}
-                      </div>
+                    <div className="orders-m-header-row">
+                      <h3 className="orders-m-order-number">{order.order_number}</h3>
+                      <span 
+                        className={`orders-m-status-badge ${
+                          displayStatus === 'Cancelled' ? 'cancelled' : 
+                          displayStatus === 'Invoiced' ? 'invoice' : 'pending'
+                        }`}
+                      >
+                        {displayStatus}
+                      </span>
                     </div>
                   </div>
 
@@ -253,25 +207,37 @@ function StaffOrders() {
                     )}
                   </div>
 
-                  {/* Footer Status */}
+                  {/* Footer - Now includes cancel button at bottom */}
                   <div className="orders-m-footer">
-                    {displayStatus === 'Cancelled' && (
-                      <span style={{
-                        color: '#dc3545',
-                        fontWeight: 'bold',
-                        fontSize: '14px'
-                      }}>
-                        ❌ Order Cancelled
-                      </span>
-                    )}
-                    {displayStatus === 'Invoiced' && order.invoice_number && (
-                      <span style={{
-                        color: '#155724',
-                        fontWeight: 'bold',
-                        fontSize: '14px'
-                      }}>
-                        ✅ Invoice: {order.invoice_number}
-                      </span>
+                    <div>
+                      {displayStatus === 'Cancelled' && (
+                        <span className="orders-m-cancelled-label">
+                          ❌ Order Cancelled
+                        </span>
+                      )}
+                      {displayStatus === 'Invoiced' && order.invoice_number && (
+                        <span className="orders-m-invoiced-label">
+                          ✅ Invoice: {order.invoice_number}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Cancel Button moved to bottom right */}
+                    {showCancelButton && (
+                      <button
+                        className="orders-m-cancel-btn"
+                        onClick={(e) => handleCancelOrder(order.order_number, e)}
+                        disabled={loadingCancel[order.order_number]}
+                      >
+                        {loadingCancel[order.order_number] ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Cancelling...
+                          </>
+                        ) : (
+                          'Cancel Order'
+                        )}
+                      </button>
                     )}
                   </div>
                 </div>
