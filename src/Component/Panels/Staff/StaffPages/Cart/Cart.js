@@ -56,8 +56,9 @@ function CartPage() {
           productMap[product.id] = {
             name: product.name,
             unit: product.unit,
-            gst_rate: product.gst_rate,
-            price: product.price
+            gst_rate: parseFloat(product.gst_rate) || 0,
+            price: parseFloat(product.price) || 0,
+            inclusive_gst: product.inclusive_gst || "Exclusive"
           };
         });
         
@@ -192,62 +193,205 @@ function CartPage() {
     }
   };
 
-  // Calculate totals with proper price handling
-  const calculateTotals = () => {
+  // CALCULATION FUNCTIONS - Same as Cart component
+  const calculateItemBreakdown = (item) => {
+    const product = productDetails[item.product_id] || {};
+    const price = product.price || item.price || 0;
+    const gstRate = product.gst_rate || 0;
+    const isInclusiveGST = product.inclusive_gst === "Inclusive";
+    const quantity = item.quantity || 1;
+    const creditMultiplier = item.credit_percentage ? (1 + (item.credit_percentage / 100)) : 1;
+    const creditPercentage = item.credit_percentage || 0;
+    const userDiscountPercentage = parseFloat(discount) || 0; // Using the discount from state
+
+    // FOR INCLUSIVE GST
+    if (isInclusiveGST) {
+      // Step 1: Extract base amount from price (which includes GST)
+      const baseAmountPerUnit = price / (1 + (gstRate / 100));
+      
+      // Step 2: Apply credit charge per unit
+      const priceAfterCreditPerUnit = baseAmountPerUnit * creditMultiplier;
+      const creditChargePerUnit = priceAfterCreditPerUnit - baseAmountPerUnit;
+      
+      // Step 3: Calculate total for quantity
+      const totalBaseAmount = baseAmountPerUnit * quantity;
+      const totalCreditCharges = creditChargePerUnit * quantity;
+      const totalAmountAfterCredit = totalBaseAmount + totalCreditCharges;
+      
+      // Step 4: Apply user discount
+      let discountAmount = 0;
+      if (userDiscountPercentage > 0) {
+        discountAmount = (totalAmountAfterCredit * userDiscountPercentage) / 100;
+      }
+      
+      // Step 5: Calculate taxable amount
+      const taxableAmount = totalAmountAfterCredit - discountAmount;
+      
+      // Step 6: Calculate tax amount on taxable amount
+      const taxAmount = (taxableAmount * gstRate) / 100;
+      
+      // Step 7: Final total
+      const finalPayableAmount = taxableAmount + taxAmount;
+
+      return {
+        basePrice: price,
+        gstRate,
+        isInclusiveGST: true,
+        quantity,
+        creditMultiplier,
+        creditPercentage,
+        userDiscountPercentage,
+        
+        perUnit: {
+          price: price,
+          baseAmount: baseAmountPerUnit,
+          creditCharge: creditChargePerUnit,
+        },
+        
+        totalBaseAmount,
+        totalCreditCharges,
+        discountAmount,
+        taxableAmount,
+        taxAmount,
+        finalPayableAmount
+      };
+    }
+    
+    // FOR EXCLUSIVE GST
+    else {
+      const baseAmountPerUnit = price;
+      const priceAfterCreditPerUnit = baseAmountPerUnit * creditMultiplier;
+      const creditChargePerUnit = priceAfterCreditPerUnit - baseAmountPerUnit;
+      
+      const totalBaseAmount = baseAmountPerUnit * quantity;
+      const totalCreditCharges = creditChargePerUnit * quantity;
+      const totalAmountAfterCredit = totalBaseAmount + totalCreditCharges;
+      
+      let discountAmount = 0;
+      if (userDiscountPercentage > 0) {
+        discountAmount = (totalAmountAfterCredit * userDiscountPercentage) / 100;
+      }
+      
+      const taxableAmount = totalAmountAfterCredit - discountAmount;
+      const taxAmount = (taxableAmount * gstRate) / 100;
+      const finalPayableAmount = taxableAmount + taxAmount;
+
+      return {
+        basePrice: price,
+        gstRate,
+        isInclusiveGST: false,
+        quantity,
+        creditMultiplier,
+        creditPercentage,
+        userDiscountPercentage,
+        
+        perUnit: {
+          price: price,
+          baseAmount: baseAmountPerUnit,
+          creditCharge: creditChargePerUnit,
+        },
+        
+        totalBaseAmount,
+        totalCreditCharges,
+        discountAmount,
+        taxableAmount,
+        taxAmount,
+        finalPayableAmount
+      };
+    }
+  };
+
+  // Calculate item total
+  const calculateItemTotal = (item) => {
+    const breakdown = calculateItemBreakdown(item);
+    return breakdown.finalPayableAmount;
+  };
+
+  // Calculate item discount
+  const calculateItemDiscount = (item) => {
+    const breakdown = calculateItemBreakdown(item);
+    return breakdown.discountAmount;
+  };
+
+  // Calculate totals for the entire cart
+  const calculateCartTotals = () => {
     let subtotal = 0;
-    let creditCharges = 0;
+    let totalCreditCharges = 0;
+    let totalDiscount = 0;
+    let totalTax = 0;
+    let finalTotal = 0;
+    let itemCount = 0;
 
     cartItems.forEach(item => {
-      // Use product price from productDetails if available, otherwise use cart item price
-      const price = productDetails[item.product_id]?.price || item.price || 0;
-      const quantity = item.quantity || 1;
-      const itemTotal = price * quantity;
-      subtotal += itemTotal;
+      const breakdown = calculateItemBreakdown(item);
       
-      // Calculate credit charges if any
-      if (item.credit_percentage && item.credit_percentage > 0) {
-        creditCharges += itemTotal * (item.credit_percentage / 100);
-      }
+      subtotal += breakdown.totalBaseAmount;
+      totalCreditCharges += breakdown.totalCreditCharges;
+      totalDiscount += breakdown.discountAmount;
+      totalTax += breakdown.taxAmount;
+      finalTotal += breakdown.finalPayableAmount;
+      itemCount += breakdown.quantity;
     });
-
-    const discountAmount = subtotal * (discount / 100);
-    const finalTotal = subtotal + creditCharges - discountAmount;
 
     return {
       subtotal,
-      creditCharges,
-      discountAmount,
+      totalCreditCharges,
+      totalDiscount,
+      totalTax,
       finalTotal,
-      itemCount: cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0)
+      itemCount
     };
   };
 
-  const totals = calculateTotals();
+  const totals = calculateCartTotals();
 
-  // Proceed to checkout
-  // In CartPage.js - update the handleProceedToCheckout function
-const handleProceedToCheckout = () => {
-  if (cartItems.length === 0) {
-    alert("Cart is empty. Add items before checkout.");
-    return;
-  }
-
-  navigate("/staff/checkout", {
-    state: {
-      retailerId,
-      customerName,
-      discount,
-      cartItems: cartItems.map(item => ({
-        ...item,
-        item_name: productDetails[item.product_id]?.name || `Product ${item.product_id}`,
-        price: productDetails[item.product_id]?.price || item.price || 0
-      })),
-      staffId: userRole === 'staff' ? staffId : null,
-      userRole,
-      totals: totals // Already calculated
+  // Proceed to checkout - Updated with all breakdown data
+  const handleProceedToCheckout = () => {
+    if (cartItems.length === 0) {
+      alert("Cart is empty. Add items before checkout.");
+      return;
     }
-  });
-};
+
+    // Prepare cart items with full breakdown for checkout
+    const checkoutItems = cartItems.map(item => {
+      const breakdown = calculateItemBreakdown(item);
+      const product = productDetails[item.product_id] || {};
+      
+      return {
+        ...item,
+        item_name: product.name || `Product ${item.product_id}`,
+        price: product.price || item.price || 0,
+        gst_rate: product.gst_rate || 0,
+        inclusive_gst: product.inclusive_gst || "Exclusive",
+        // Include full breakdown for checkout calculations
+        breakdown: {
+          ...breakdown,
+          productDetails: product
+        }
+      };
+    });
+
+    navigate("/staff/checkout", {
+      state: {
+        retailerId,
+        customerName,
+        discount,
+        cartItems: checkoutItems,
+        staffId: userRole === 'staff' ? staffId : null,
+        userRole,
+        totals: totals,
+        // Add credit breakdown for reference
+        creditBreakdown: {
+          subtotal: totals.subtotal,
+          totalCreditCharges: totals.totalCreditCharges,
+          totalDiscount: totals.totalDiscount,
+          totalTax: totals.totalTax,
+          userDiscount: discount,
+          finalTotal: totals.finalTotal
+        }
+      }
+    });
+  };
 
   // Continue shopping
   const handleContinueShopping = () => {
@@ -258,6 +402,21 @@ const handleProceedToCheckout = () => {
         customerName
       }
     });
+  };
+
+  // Helper function for credit period display
+  const getCreditPeriodDisplay = (item) => {
+    if (!item.credit_period && item.credit_period !== 0) return "Select Credit Period";
+    
+    if (item.credit_period === 0) return "No Credit Period";
+    
+    const period = creditPeriods.find(cp => 
+      cp.credit_period === parseInt(item.credit_period)
+    );
+    if (period) {
+      return `${period.credit_period} days (+${period.credit_percentage}%)`;
+    }
+    return `${item.credit_period} days`;
   };
 
   return (
@@ -275,9 +434,24 @@ const handleProceedToCheckout = () => {
           {customerName && (
             <div className="customer-info">
               Customer: <strong>{customerName}</strong>
+              {discount > 0 && (
+                <span className="discount-badge"> - {discount}% Discount</span>
+              )}
             </div>
           )}
         </div>
+
+        {/* User Discount Banner */}
+        {discount > 0 && (
+          <div className="discount-banner">
+            <div className="banner-content">
+              <span className="banner-icon">🎉</span>
+              <span className="banner-text">
+                Customer Discount: <strong>{discount}%</strong> off applied to all items
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Cart Summary Bar */}
         <div className="cart-summary-bar">
@@ -287,14 +461,8 @@ const handleProceedToCheckout = () => {
           </div>
           <div className="summary-item">
             <span>Total:</span>
-            <span className="price">₹{totals.finalTotal.toLocaleString()}</span>
+            <span className="price">₹{totals.finalTotal.toLocaleString('en-IN')}</span>
           </div>
-          {discount > 0 && (
-            <div className="summary-item">
-              <span>Discount:</span>
-              <span className="discount">-{discount}%</span>
-            </div>
-          )}
         </div>
 
         {/* Loading State */}
@@ -340,20 +508,19 @@ const handleProceedToCheckout = () => {
             
             <div className="cart-items-list">
               {cartItems.map(item => {
+                const breakdown = calculateItemBreakdown(item);
                 const product = productDetails[item.product_id] || {};
-                const price = product.price || item.price || 0;
-                const itemTotal = price * (item.quantity || 1);
                 
                 return (
                   <div key={item.id} className="cart-item-card">
                     <div className="item-main-info">
                       <h4>{product.name || `Product ${item.product_id}`}</h4>
                       <div className="item-details">
-                        <span className="price">₹{price.toLocaleString()}</span>
+                        <span className="price">₹{breakdown.basePrice.toLocaleString('en-IN')}</span>
                         {product.unit && <span className="unit">/{product.unit}</span>}
-                        {product.gst_rate && (
-                          <span className="gst-badge">GST: {product.gst_rate}%</span>
-                        )}
+                        <span className={`gst-badge ${breakdown.isInclusiveGST ? 'inclusive' : 'exclusive'}`}>
+                          {breakdown.isInclusiveGST ? 'Incl. GST' : 'Excl. GST'} {breakdown.gstRate}%
+                        </span>
                       </div>
                       
                       {/* Credit Period Selector for each item */}
@@ -386,7 +553,7 @@ const handleProceedToCheckout = () => {
                               key={period.credit_period} 
                               value={period.credit_period?.toString()}
                             >
-                              {period.credit_period} days ({period.credit_percentage}% charge)
+                              {period.credit_period} days (+{period.credit_percentage}%)
                             </option>
                           ))}
                         </select>
@@ -395,9 +562,50 @@ const handleProceedToCheckout = () => {
                       {/* Credit Period Indicator */}
                       {item.credit_period > 0 && (
                         <div className="credit-badge">
-                          Credit: {item.credit_period} days ({item.credit_percentage}%)
+                          Credit: {item.credit_period} days (+{item.credit_percentage}%)
                         </div>
                       )}
+
+                      {/* Item Calculation Breakdown */}
+                      <div className="calculation-breakdown">
+                        <div className="breakdown-row">
+                          <span>Base Amount:</span>
+                          <span>₹{breakdown.totalBaseAmount.toLocaleString('en-IN')}</span>
+                        </div>
+                        
+                        {breakdown.totalCreditCharges > 0 && (
+                          <div className="breakdown-row credit-charge">
+                            <span>Credit Charges (+{breakdown.creditPercentage}%):</span>
+                            <span>+₹{breakdown.totalCreditCharges.toLocaleString('en-IN')}</span>
+                          </div>
+                        )}
+                        
+                        {discount > 0 && (
+                          <div className="breakdown-row discount">
+                            <span>Discount ({discount}%):</span>
+                            <span>-₹{breakdown.discountAmount.toLocaleString('en-IN')}</span>
+                          </div>
+                        )}
+                        
+                        <div className="breakdown-row">
+                          <span>Taxable Amount:</span>
+                          <span>₹{breakdown.taxableAmount.toLocaleString('en-IN')}</span>
+                        </div>
+                        
+                        {breakdown.taxAmount > 0 && (
+                          <div className="breakdown-row tax">
+                            <span>GST ({breakdown.gstRate}%):</span>
+                            <span>+₹{breakdown.taxAmount.toLocaleString('en-IN')}</span>
+                          </div>
+                        )}
+                        
+                        <div className="breakdown-row total">
+                          <span>Item Total:</span>
+                          <span className="item-total-amount">
+                            ₹{breakdown.finalPayableAmount.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Quantity Controls */}
@@ -418,8 +626,8 @@ const handleProceedToCheckout = () => {
                         </button>
                       </div>
 
-                      <div className="item-total">
-                        ₹{itemTotal.toLocaleString()}
+                      <div className="per-unit-price">
+                        ₹{(breakdown.finalPayableAmount / breakdown.quantity).toFixed(2)} per unit
                       </div>
 
                       <button
@@ -440,27 +648,40 @@ const handleProceedToCheckout = () => {
               
               <div className="summary-row">
                 <span>Subtotal ({totals.itemCount} items):</span>
-                <span>₹{totals.subtotal.toLocaleString()}</span>
+                <span>₹{totals.subtotal.toLocaleString('en-IN')}</span>
               </div>
               
-              {totals.creditCharges > 0 && (
+              {totals.totalCreditCharges > 0 && (
                 <div className="summary-row credit-charges">
-                  <span>Credit Charges:</span>
-                  <span>+₹{totals.creditCharges.toLocaleString()}</span>
+                  <span>Total Credit Charges:</span>
+                  <span>+₹{totals.totalCreditCharges.toLocaleString('en-IN')}</span>
                 </div>
               )}
               
-              {discount > 0 && (
+              {totals.totalDiscount > 0 && (
                 <div className="summary-row discount">
-                  <span>Discount ({discount}%):</span>
-                  <span>-₹{totals.discountAmount.toLocaleString()}</span>
+                  <span>Customer Discount ({discount}%):</span>
+                  <span>-₹{totals.totalDiscount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              
+              {totals.totalTax > 0 && (
+                <div className="summary-row tax">
+                  <span>Total GST:</span>
+                  <span>+₹{totals.totalTax.toLocaleString('en-IN')}</span>
                 </div>
               )}
               
               <div className="summary-row total">
                 <span>Final Total:</span>
-                <span className="final-total">₹{totals.finalTotal.toLocaleString()}</span>
+                <span className="final-total">₹{totals.finalTotal.toLocaleString('en-IN')}</span>
               </div>
+
+              {totals.totalDiscount > 0 && (
+                <div className="savings-note">
+                  🎉 Customer saved ₹{totals.totalDiscount.toLocaleString('en-IN')} with {discount}% discount!
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

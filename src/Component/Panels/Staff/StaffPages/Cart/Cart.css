@@ -288,7 +288,7 @@
 }
 
 .summary-row.discount {
-  color: #d32f2f;
+  color: #489c55;
 }
 
 .summary-row.total {
@@ -331,6 +331,117 @@
 
 .continue-btn:hover {
   background: #e9ecef;
+}
+
+/* Add these styles to your existing Cart.css */
+
+.discount-banner {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 12px 16px;
+  margin: 0 16px 16px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.banner-icon {
+  font-size: 1.2rem;
+}
+
+.banner-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.banner-text strong {
+  font-weight: 700;
+}
+
+.discount-badge {
+  background: #10b981;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.calculation-breakdown {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #e2e8f0;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.breakdown-row.credit-charge {
+  color: #f97316;
+}
+
+.breakdown-row.discount {
+  color: #10b981;
+}
+
+.breakdown-row.tax {
+  color: #8b5cf6;
+}
+
+.breakdown-row.total {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 4px;
+  padding-top: 8px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.item-total-amount {
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.per-unit-price {
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.savings-note {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.gst-badge.inclusive {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.gst-badge.exclusive {
+  background: #f3e8ff;
+  color: #6b21a8;
 }
 
 .checkout-btn {

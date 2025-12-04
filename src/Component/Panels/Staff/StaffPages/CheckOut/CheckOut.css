@@ -306,6 +306,223 @@
   background: #5c636a;
 }
 
+/* Add these styles to your existing CheckOut.css */
+
+/* Order Mode Section */
+.order-mode-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.order-mode-section h3 {
+  margin-bottom: 12px;
+  color: #334155;
+  font-size: 1.1rem;
+}
+
+.order-mode-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.order-mode-btn {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.order-mode-btn.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.order-mode-btn:hover:not(.active) {
+  border-color: #94a3b8;
+}
+
+.order-mode-note {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+/* Order Mode Indicators */
+.order-mode-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.order-mode-badge.kacha {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.order-mode-badge.pakka {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.order-mode-indicator {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.order-mode-indicator.kacha {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.order-mode-indicator.pakka {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Breakdown Card for Success Page */
+.breakdown-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.breakdown-card h4 {
+  margin-bottom: 16px;
+  color: #334155;
+  font-size: 1.1rem;
+}
+
+.breakdown-card .breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.breakdown-card .breakdown-row:last-child {
+  border-bottom: none;
+}
+
+.breakdown-card .breakdown-row.total {
+  border-top: 2px solid #cbd5e1;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Item Breakdown in Checkout Items */
+.item-breakdown {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+.item-breakdown .breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.item-breakdown .breakdown-row.item-total {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 4px;
+  padding-top: 8px;
+  font-weight: 600;
+}
+
+/* GST Badge */
+.gst-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.gst-badge.inclusive {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.gst-badge.exclusive {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+/* Item Details */
+.item-details {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 6px 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.item-details .unit {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Order Summary Section Updates */
+.order-summary-section .savings-note {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Credit Info */
+.credit-info {
+  color: #f97316;
+  font-size: 0.85rem;
+  margin: 4px 0;
+  font-weight: 500;
+}
+
+/* Summary Row Colors */
+.summary-item.credit {
+  color: #f97316;
+}
+
+.summary-item.discount {
+  color: #10b981;
+}
+
+.summary-item.tax {
+  color: #8b5cf6;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .checkout-page {
