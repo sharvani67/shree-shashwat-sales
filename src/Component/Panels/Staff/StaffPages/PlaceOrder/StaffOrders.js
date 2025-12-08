@@ -45,7 +45,7 @@ function StaffOrders() {
 
   const handleCancelOrder = async (orderNumber, e) => {
     e.stopPropagation(); // Prevent card click event
-    
+
     if (!window.confirm("Are you sure you want to cancel this order?")) {
       return;
     }
@@ -66,7 +66,7 @@ function StaffOrders() {
               : order
           )
         );
-        
+
         toast.success("Order cancelled successfully!");
       }
     } catch (error) {
@@ -83,28 +83,33 @@ function StaffOrders() {
     if (order.order_status === 'Cancelled') {
       return 'Cancelled';
     }
-    
+
     // If invoice is generated (invoice_status = 1), show Invoice
     if (order.invoice_status === 1) {
       return 'Invoiced';
     }
-    
+
     // Default to Pending
     return 'Pending';
   };
 
   // Helper function to determine if cancel button should be shown
-  const shouldShowCancelButton = (order) => {
-    // Don't show if already cancelled
-    if (order.order_status === 'Cancelled') return false;
-    
-    // Only show if invoice_status is 0 AND order_status is not Invoice
-    if (order.invoice_status === 0 && order.order_status !== 'Invoice') {
-      return true;
-    }
-    
-    return false;
-  };
+// Helper function to determine if cancel button should be shown
+const shouldShowCancelButton = (order) => {
+  // Hide cancel if already cancelled
+  if (order.order_status === "Cancelled") return false;
+
+  // ❗ Hide cancel if rejected
+  if (order.approval_status === "Rejected") return false;
+
+  // Only show if invoice_status is 0 AND order_status is not Invoice
+  if (order.invoice_status === 0 && order.order_status !== "Invoice") {
+    return true;
+  }
+
+  return false;
+};
+
 
   const filteredOrders = orders.filter((order) =>
     order.order_number.toLowerCase().includes(searchTerm.toLowerCase())
@@ -145,7 +150,7 @@ function StaffOrders() {
             {filteredOrders.map((order) => {
               const displayStatus = getDisplayStatus(order);
               const showCancelButton = shouldShowCancelButton(order);
-              
+
               return (
                 <div
                   className="orders-m-card"
@@ -157,11 +162,10 @@ function StaffOrders() {
                   <div className="orders-m-card-header">
                     <div className="orders-m-header-row">
                       <h3 className="orders-m-order-number">{order.order_number}</h3>
-                      <span 
-                        className={`orders-m-status-badge ${
-                          displayStatus === 'Cancelled' ? 'cancelled' : 
-                          displayStatus === 'Invoiced' ? 'invoice' : 'pending'
-                        }`}
+                      <span
+                        className={`orders-m-status-badge ${displayStatus === 'Cancelled' ? 'cancelled' :
+                            displayStatus === 'Invoiced' ? 'invoice' : 'pending'
+                          }`}
                       >
                         {displayStatus}
                       </span>
@@ -171,18 +175,28 @@ function StaffOrders() {
                   {/* Order Info */}
                   <div className="orders-m-info">
                     <p className="orders-m-amount">Amount: ₹ {order.order_total}</p>
-                    <p className="orders-m-date">
-                      Invoice Date: {order.invoice_date ? new Date(order.invoice_date).toLocaleDateString() : 'Not Generated'}
-                    </p>
-                    <p className="orders-m-date">
-                      Delivery Date: {new Date(order.estimated_delivery_date).toLocaleDateString()}
-                    </p>
                     <p className="orders-m-credit">
-                      Customer: {order.customer_name} 
+                      Customer: {order.customer_name}
                     </p>
-                    <p className="orders-m-invoice-status">
-                      Invoice Status: {order.invoice_status === 1 ? 'Generated' : 'Not Generated'}
-                    </p>
+                  <div className="approval-row">
+  <span className="approval-label">Approval Status : </span>
+
+  <span
+    className={`approval-badge ${
+      order.approval_status === "Approved"
+        ? "approval-approved"
+        : order.approval_status === "Rejected"
+        ? "approval-rejected"
+        : "approval-pending"
+    }`}
+  >
+    {order.approval_status === "Pending"
+      ? "Pending"
+      : order.approval_status}
+  </span>
+</div>
+
+
                   </div>
 
                   {/* Items LIST */}
@@ -221,7 +235,7 @@ function StaffOrders() {
                         </span>
                       )}
                     </div>
-                    
+
                     {/* Cancel Button moved to bottom right */}
                     {showCancelButton && (
                       <button

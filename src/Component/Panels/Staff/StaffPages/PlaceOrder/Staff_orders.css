@@ -245,3 +245,29 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transform: translateY(-2px);
 }
+
+/* Base Badge */
+.approval-badge {
+ 
+  font-size: 13px;
+  font-weight: 600;
+  
+}
+
+/* Approved – Green Outline */
+.approval-approved {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+/* Rejected – Red Outline */
+.approval-rejected {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* Pending – Amber Outline */
+.approval-pending {
+  border-color: #d97706;
+  color: #d97706;
+}
