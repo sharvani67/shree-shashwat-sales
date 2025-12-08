@@ -277,6 +277,7 @@ const handlePlaceOrder = async () => {
       estimated_delivery_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
       order_placed_by: actualStaffId,
       order_mode: orderMode,
+      approval_status: "Not Approved",
       // Fixed: Use staffName instead of loggedInUser?.name
       ordered_by: staffName,
       // Use actualStaffId for staff_id field
