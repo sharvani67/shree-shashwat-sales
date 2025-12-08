@@ -30,6 +30,9 @@ import ViewDetails from "./Component/Panels/Staff/StaffPages/Staff_MyRetailers/V
 import StaffOrders from "./Component/Panels/Staff/StaffPages/PlaceOrder/StaffOrders";
 import OrderFullDetails from "./Component/Panels/Staff/StaffPages/PlaceOrder/OrderFullDetails";
 import ProfilePage from "./Component/Panels/Staff/StaffPages/StaffMobileLayout/ProfilePage";
+import StaffInventory from "./Component/Panels/Staff/StaffPages/Inventory"; // Adjust path as needed
+
+
 
 
 function App() {
@@ -41,6 +44,8 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/staffdashboard" element={<StaffDashboard />} />
+
+        <Route path="/staff/inventory" element={<StaffInventory />} />
 
         {/* Staff Mobile Pages */}
         <Route path="/staff/retailers" element={<MyRetailers />} />
