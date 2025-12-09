@@ -30,7 +30,6 @@ function StaffMobileLayout({ children }) {
     }
   }, []);
 
-  // 🔥 Add relatedPaths here
   const menuItems = [
     {
       path: "/staffdashboard",
@@ -40,43 +39,37 @@ function StaffMobileLayout({ children }) {
     },
     {
       path: "/staff/retailers",
-      relatedPaths: ["/staff/retailers", "/staff/place-sales-order"," /staff/cart" ,"/staff/checkout" ,"/staff/view-retailers/"],
+      relatedPaths: ["/staff/retailers", "/staff/place-sales-order", "/staff/cart", "/staff/checkout", "/staff/view-retailers/"],
       icon: <FaBullseye />,
       label: "Retailers",
     },
     {
       path: "/staff/sales-visits",
-      relatedPaths: ["/staff/log-visit" , " /staff/sales-visits"],
+      relatedPaths: ["/staff/log-visit", "/staff/sales-visits"],
       icon: <FaClipboardList />,
       label: "Sales Visits",
     },
     {
       path: "/staff/orders",
-      relatedPaths: [
-        "/staff/orders",
-        "/staff/order-details/"
-      ],
+      relatedPaths: ["/staff/orders", "/staff/order-details/"],
       icon: <FaShoppingBag />,
       label: "Orders",
     },
     {
       path: "/staff_expensive",
-      relatedPaths: ["/staff_add_expensive" , "/staff_expensive"],
+      relatedPaths: ["/staff_add_expensive", "/staff_expensive"],
       icon: <FaMoneyBillWave />,
       label: "Expenses",
     },
   ];
 
-  // 🔥 Updated isActive to support related paths
   const isActive = (item) => {
     const current = location.pathname;
 
-    // Exact or nested under main path
     if (current === item.path || current.startsWith(item.path + "/")) {
       return true;
     }
 
-    // Check related paths
     if (item.relatedPaths && item.relatedPaths.some((p) => current.startsWith(p))) {
       return true;
     }
@@ -131,13 +124,12 @@ function StaffMobileLayout({ children }) {
 
           {showProfileMenu && (
             <div className="profile-dropdown">
-              <div className="dropdown-divider"></div>
-              <button className="dropdown-item" onClick={handleProfileClick}>
+              <button className="dropdown-item-mobile" onClick={handleProfileClick}>
                 <FaUser className="dropdown-item-icon" />
                 <span>View Profile</span>
               </button>
 
-              <button className="dropdown-item logout-item" onClick={handleLogout}>
+              <button className="dropdown-item-mobile logout-item" onClick={handleLogout}>
                 <FaSignOutAlt className="dropdown-item-icon" />
                 <span>Logout</span>
               </button>
