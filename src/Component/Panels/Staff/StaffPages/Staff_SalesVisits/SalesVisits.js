@@ -82,13 +82,12 @@ function SalesVisits() {
       .finally(() => setLoadingRetailers(false));
   }, []);
 
-  const filteredSalesVisits = salesVisitsData.filter(
-    (visit) =>
-      visit.retailer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.staff_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+ const filteredSalesVisits = salesVisitsData.filter(
+  (visit) =>
+    (visit.retailer_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (visit.id?.toString() || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (visit.transaction_type?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+);
   const handleLogVisit = () => navigate("/staff/log-visit");
 
   const handleEditVisit = (visit) => {
@@ -208,7 +207,7 @@ function SalesVisits() {
           ) : filteredSalesVisits.length === 0 ? (
             <p>No sales visits found.</p>
           ) : (
-            filteredSalesVisits.map((visit) => (
+            filteredSalesVisits.map((visit , index) => (
               <div key={visit.id} className="visit-card">
                 {editingVisitId === visit.id ? (
                   <div className="edit-form">
@@ -286,7 +285,7 @@ function SalesVisits() {
                 ) : (
                   <>
                     <div className="visit-header">
-                      <div className="visit-id">{visit.id}</div>
+                      <div className="visit-id">{index + 1}</div>  
                       <span className={`outcome-badge ${visit.visit_outcome?.toLowerCase()}`}>{visit.visit_outcome}</span>
                     </div>
                     <div className="visit-retailer">

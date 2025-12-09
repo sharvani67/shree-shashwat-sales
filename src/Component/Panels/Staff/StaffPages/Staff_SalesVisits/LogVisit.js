@@ -4,11 +4,13 @@ import StaffMobileLayout from "../StaffMobileLayout/StaffMobileLayout";
 import { baseurl } from "./../../../../BaseURL/BaseURL";
 import "./LogVisit.css";
 
+
 function LogVisit() {
   const navigate = useNavigate();
   const [retailers, setRetailers] = useState([]);
   const [loadingRetailers, setLoadingRetailers] = useState(true);
   const [error, setError] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Get logged-in user from localStorage
   const storedData = localStorage.getItem("user");
@@ -104,9 +106,13 @@ function LogVisit() {
       });
       const data = await res.json();
       if (data.success) {
-        console.log("Visit logged:", data.data);
-        navigate("/staff/sales-visits");
-      } else {
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate("/staff/sales-visits");
+        }, 1500);
+      }
+      else {
         console.error("Failed to save visit:", data);
         alert(`Failed to save visit: ${data.error || "Unknown error"}`);
       }
@@ -120,8 +126,20 @@ function LogVisit() {
     navigate("/staff/sales-visits");
   };
 
+
+
+
   return (
     <StaffMobileLayout>
+
+      {showSuccess && (
+        <div className="success-popup">
+          <div className="success-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="success" className="success-icon" />
+            <p>Visit Logged Successfully!</p>
+          </div>
+        </div>
+      )}
       <div className="log-visit-mobile">
         <header className="form-header1">
           <h1>Log Sales Visit</h1>
@@ -215,7 +233,7 @@ function LogVisit() {
               onChange={handleInputChange}
             >
               <option value="">Select transaction type</option>
-              <option value="Paikka">Paikka</option>
+              <option value="Paikka">Pakka</option>
               <option value="Kaccha">Kaccha</option>
               <option value="Partial">Partial</option>
               <option value="Full">Full</option>
@@ -237,14 +255,14 @@ function LogVisit() {
 
           {/* Buttons */}
           <div className="form-buttons">
-             
+
             <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancel
             </button>
-             <button type="submit" className="submit-btn log-btn">
-            Submit
+            <button type="submit" className="submit-btn log-btn">
+              Submit
             </button>
-          
+
           </div>
         </form>
       </div>

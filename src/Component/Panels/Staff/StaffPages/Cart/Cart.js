@@ -425,12 +425,12 @@ function CartPage() {
         {/* Header */}
         <div className="cart-header">
           <button 
-            className="back-btn"
+            className="shopping-back-btn"
             onClick={handleContinueShopping}
           >
-            ← Continue Shopping
+            ← 
           </button>
-          <h1>🛒 Shopping Cart</h1>
+          <h1>Shopping Cart 🛒</h1>
           {customerName && (
             <div className="customer-info">
               Customer: <strong>{customerName}</strong>
