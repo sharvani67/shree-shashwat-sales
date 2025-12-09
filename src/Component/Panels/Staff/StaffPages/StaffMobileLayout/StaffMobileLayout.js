@@ -8,7 +8,6 @@ import {
   FaSignOutAlt,
   FaMoneyBillWave,
   FaUserCircle,
-  FaChevronDown,
   FaShoppingBag
 } from "react-icons/fa";
 import "./StaffMobileLayout.css";
@@ -56,7 +55,6 @@ function StaffMobileLayout({ children }) {
       relatedPaths: [
         "/staff/orders",
         "/staff/order-details/"
-        
       ],
       icon: <FaShoppingBag />,
       label: "Orders",
@@ -129,19 +127,15 @@ function StaffMobileLayout({ children }) {
         <div className="profile-menu-container">
           <button className="profile-btn" onClick={toggleProfileMenu}>
             <FaUserCircle className="profile-icon" />
-            <FaChevronDown className={`chevron-icon ${showProfileMenu ? "rotated" : ""}`} />
           </button>
 
           {showProfileMenu && (
             <div className="profile-dropdown">
               <div className="dropdown-divider"></div>
-
               <button className="dropdown-item" onClick={handleProfileClick}>
                 <FaUser className="dropdown-item-icon" />
                 <span>View Profile</span>
               </button>
-
-              <div className="dropdown-divider"></div>
 
               <button className="dropdown-item logout-item" onClick={handleLogout}>
                 <FaSignOutAlt className="dropdown-item-icon" />
