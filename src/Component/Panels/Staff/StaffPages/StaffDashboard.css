@@ -180,3 +180,76 @@
     font-size: 22px;
   }
 }
+
+
+/* Add these styles to your existing StaffDashboard.css */
+
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: center;
+  border: 1px solid #fcc;
+}
+
+.stat-link {
+  font-size: 12px;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.stat-link:hover {
+  text-decoration: underline;
+}
+
+/* Optional: Style for the stats grid to accommodate 4 cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #eaeaea;
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 10px 0;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 10px 0;
+}
+
+.stat-change {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.positive {
+  color: #00a854;
+}
