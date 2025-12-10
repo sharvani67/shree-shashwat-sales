@@ -201,7 +201,7 @@ function Checkout() {
     return cartItems.length > 0 ? Math.round(totalPeriod / cartItems.length) : 0;
   };
 
-  // Enhanced place order function with all calculations
+
   // Enhanced place order function with all calculations
 const handlePlaceOrder = async () => {
   if (!retailerId || !cartItems || cartItems.length === 0) {
@@ -223,8 +223,8 @@ const handlePlaceOrder = async () => {
       console.log("Logged in user data:", loggedInUser);
       
       // Extract user information
-      staffName = loggedInUser.name || loggedInUser.username || loggedInUser.full_name || "Staff Member";
-      staffIdFromStorage = loggedInUser.id || loggedInUser.user_id || loggedInUser.staff_id;
+      staffName = loggedInUser.name || "Staff Member";
+      staffIdFromStorage = loggedInUser.id;
       assignedStaff = loggedInUser.assigned_staff || loggedInUser.supervisor_name || staffName;
       
       // Use staff ID from localStorage if not provided in state
@@ -246,16 +246,29 @@ const handlePlaceOrder = async () => {
     return;
   }
 
-  // If staff name is still null, provide a default
-  if (!staffName) {
-    staffName = `Staff ${actualStaffId}`;
-  }
-  
-  if (!assignedStaff) {
-    assignedStaff = staffName;
-  }
-
   setLoading(true);
+
+  // ---------------------------------------------------------
+// 1. Fetch Staff Details From Backend (accounts/:id)
+// ---------------------------------------------------------
+let staffIncentive = 0;
+let assignedStaffName = "Unknown Staff";
+
+try {
+  const staffRes = await fetch(`${baseurl}/accounts/${actualStaffId}`);
+  if (staffRes.ok) {
+    const staffData = await staffRes.json();
+    console.log("Fetched Staff Data:", staffData);
+
+    staffIncentive = staffData.incentive_percent || 0;
+    assignedStaffName = staffData.name || "Unknown Staff";
+  } else {
+    console.warn("Failed to fetch staff details from backend");
+  }
+} catch (error) {
+  console.error("Error fetching staff details:", error);
+}
+
 
   // Generate order number
   const orderNumber = `ORD${Date.now()}`;
@@ -278,15 +291,14 @@ const handlePlaceOrder = async () => {
       order_placed_by: actualStaffId,
       order_mode: orderMode,
       approval_status: "Pending",
-      // Fixed: Use staffName instead of loggedInUser?.name
       ordered_by: staffName,
-      // Use actualStaffId for staff_id field
-      // staff_id: actualStaffId,
-      // assigned_staff: assignedStaff,
       invoice_number: null,
       invoice_date: null,
       invoice_status: 0,
-      order_status: "Pending"
+      order_status: "Pending",
+      staffid: actualStaffId,
+      assigned_staff: assignedStaffName,
+      staff_incentive: staffIncentive,
     },
     orderItems: cartItems.map(item => {
       const itemBreakdown = calculateItemBreakdown(item);

@@ -39,7 +39,7 @@ function StaffMobileLayout({ children }) {
     },
     {
       path: "/staff/retailers",
-      relatedPaths: ["/staff/retailers", "/staff/place-sales-order", "/staff/cart", "/staff/checkout", "/staff/view-retailers/"],
+      relatedPaths: ["/staff/retailers", "/staff/place-sales-order", "/staff/cart", "/staff/checkout", "/staff/view-retailers/" , "/staff/edit-retailer/"],
       icon: <FaBullseye />,
       label: "Retailers",
     },
