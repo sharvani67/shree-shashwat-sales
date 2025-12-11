@@ -5,6 +5,7 @@ import "./Staff_orders.css";
 import { useNavigate } from "react-router-dom";
 import { baseurl } from "../../../../BaseURL/BaseURL";
 import { toast } from "react-toastify";
+import { Download } from "lucide-react";
 
 function StaffOrders() {
   const [orders, setOrders] = useState([]);
@@ -94,22 +95,26 @@ function StaffOrders() {
   };
 
   // Helper function to determine if cancel button should be shown
-// Helper function to determine if cancel button should be shown
-const shouldShowCancelButton = (order) => {
-  // Hide cancel if already cancelled
-  if (order.order_status === "Cancelled") return false;
+  const shouldShowCancelButton = (order) => {
+    // Hide cancel if already cancelled
+    if (order.order_status === "Cancelled") return false;
 
-  // ❗ Hide cancel if rejected
-  if (order.approval_status === "Rejected") return false;
+    // Hide cancel if rejected
+    if (order.approval_status === "Rejected") return false;
 
-  // Only show if invoice_status is 0 AND order_status is not Invoice
-  if (order.invoice_status === 0 && order.order_status !== "Invoice") {
-    return true;
-  }
+    // Only show if invoice_status is 0 AND order_status is not Invoice
+    if (order.invoice_status === 0 && order.order_status !== "Invoice") {
+      return true;
+    }
 
-  return false;
-};
+    return false;
+  };
 
+  // Handle download invoice click
+  const handleDownloadInvoice = (orderNumber, e) => {
+    e.stopPropagation(); // Prevent card click event
+    navigate(`/staff/invoices?orderNumber=${orderNumber}`);
+  };
 
   const filteredOrders = orders.filter((order) =>
     order.order_number.toLowerCase().includes(searchTerm.toLowerCase())
@@ -150,6 +155,7 @@ const shouldShowCancelButton = (order) => {
             {filteredOrders.map((order) => {
               const displayStatus = getDisplayStatus(order);
               const showCancelButton = shouldShowCancelButton(order);
+              const isInvoiced = displayStatus === 'Invoiced';
 
               return (
                 <div
@@ -178,25 +184,22 @@ const shouldShowCancelButton = (order) => {
                     <p className="orders-m-credit">
                       Customer: {order.customer_name}
                     </p>
-                  <div className="approval-row">
-  <span className="approval-label">Approval Status : </span>
-
-  <span
-    className={`approval-badge ${
-      order.approval_status === "Approved"
-        ? "approval-approved"
-        : order.approval_status === "Rejected"
-        ? "approval-rejected"
-        : "approval-pending"
-    }`}
-  >
-    {order.approval_status === "Pending"
-      ? "Pending"
-      : order.approval_status}
-  </span>
-</div>
-
-
+                    <div className="approval-row">
+                      <span className="approval-label">Approval Status : </span>
+                      <span
+                        className={`approval-badge ${
+                          order.approval_status === "Approved"
+                            ? "approval-approved"
+                            : order.approval_status === "Rejected"
+                            ? "approval-rejected"
+                            : "approval-pending"
+                        }`}
+                      >
+                        {order.approval_status === "Pending"
+                          ? "Pending"
+                          : order.approval_status}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Items LIST */}
@@ -221,22 +224,26 @@ const shouldShowCancelButton = (order) => {
                     )}
                   </div>
 
-                  {/* Footer - Now includes cancel button at bottom */}
+                  {/* Footer - Now includes cancel button and invoice download button */}
                   <div className="orders-m-footer">
-                    <div>
+                    <div className="orders-m-footer-left">
                       {displayStatus === 'Cancelled' && (
                         <span className="orders-m-cancelled-label">
                           ❌ Order Cancelled
                         </span>
                       )}
-                      {displayStatus === 'Invoiced' && order.invoice_number && (
-                        <span className="orders-m-invoiced-label">
-                          ✅ Invoice: {order.invoice_number}
-                        </span>
+                      {isInvoiced && (
+                        <button
+                          className="orders-m-invoice-btn"
+                          onClick={(e) => handleDownloadInvoice(order.order_number, e)}
+                        >
+                          <Download size={16} />
+                          <span>Download Invoice</span>
+                        </button>
                       )}
                     </div>
 
-                    {/* Cancel Button moved to bottom right */}
+                    {/* Cancel Button */}
                     {showCancelButton && (
                       <button
                         className="orders-m-cancel-btn"

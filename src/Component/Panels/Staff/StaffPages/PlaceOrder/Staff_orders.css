@@ -271,3 +271,51 @@
   border-color: #d97706;
   color: #d97706;
 }
+
+
+/* Invoice Download Button */
+.orders-m-invoice-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.orders-m-invoice-btn:hover {
+  background: #2563eb;
+}
+
+.orders-m-invoice-btn:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.orders-m-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Update footer layout */
+.orders-m-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Cancel button adjustments */
+.orders-m-cancel-btn {
+  margin-left: auto;
+}
