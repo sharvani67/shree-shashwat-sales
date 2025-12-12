@@ -8,7 +8,8 @@ import {
   FaSignOutAlt,
   FaMoneyBillWave,
   FaUserCircle,
-  FaShoppingBag
+  FaShoppingBag,
+  FaTag // Add this import for the Offers icon
 } from "react-icons/fa";
 import "./StaffMobileLayout.css";
 
@@ -54,6 +55,12 @@ function StaffMobileLayout({ children }) {
       relatedPaths: ["/staff/orders", "/staff/order-details/"],
       icon: <FaShoppingBag />,
       label: "Orders",
+    },
+    {
+      path: "/staff/offers", // New Offers tab
+      relatedPaths: ["/staff/offers", "/staff/create-offer", "/staff/edit-offer/"],
+      icon: <FaTag />,
+      label: "Offers",
     },
     {
       path: "/staff_expensive",
