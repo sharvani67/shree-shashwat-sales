@@ -154,9 +154,17 @@ function StaffDashboard() {
           {/* Quick Actions Section */}
           <div className="quick-actions">
             <h2>Quick Actions</h2>
-            <p className="section-subtitle">Common tasks and shortcuts</p>
+            {/* <p className="section-subtitle">Common tasks and shortcuts</p> */}
 
             <div className="action-cards">
+
+                <Link to="/staff/offers" className="action-card">
+                <div className="action-icon">🏷️</div>
+                <div className="action-content">
+                  <h3>Offers </h3>
+                  <p>View All Offers </p>
+                </div>
+              </Link>
               <Link to="/staff/log-visit" className="action-card">
                 <div className="action-icon">📊</div>
                 <div className="action-content">
@@ -165,13 +173,13 @@ function StaffDashboard() {
                 </div>
               </Link>
 
-              <Link to="/staff_add_expensive" className="action-card">
+              {/* <Link to="/staff_add_expensive" className="action-card">
                 <div className="action-icon">💰</div>
                 <div className="action-content">
                   <h3>Submit Expense</h3>
                   <p>Add your daily expenses</p>
                 </div>
-              </Link>
+              </Link> */}
 
               <Link to="/staff/add-retailer" className="action-card">
                 <div className="action-icon">🏪</div>
