@@ -18,7 +18,9 @@ function CartPage() {
   const [userRole, setUserRole] = useState("");
   const [creditPeriods, setCreditPeriods] = useState([]);
   const [creditLoading, setCreditLoading] = useState(true);
-  const [productDetails, setProductDetails] = useState({}); // Store product details
+  const [productDetails, setProductDetails] = useState({});
+  const [editingPriceForItem, setEditingPriceForItem] = useState(null); // Track which item's price is being edited
+  const [editedPrice, setEditedPrice] = useState(""); // Store the edited price value
 
   // Get logged-in user
   useEffect(() => {
@@ -152,6 +154,73 @@ function CartPage() {
     }
   };
 
+  // Update price in cart
+  const updatePriceInCart = async (itemId, newPrice) => {
+    try {
+      // Validate price
+      const price = parseFloat(newPrice);
+      if (isNaN(price) || price < 0) {
+        alert("Please enter a valid price");
+        return false;
+      }
+
+      const response = await fetch(`${baseurl}/api/cart/update-cart-price/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ price: price }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update price");
+      
+      // Exit edit mode
+      setEditingPriceForItem(null);
+      setEditedPrice("");
+      
+      // Refresh cart items
+      fetchCartItems();
+      return true;
+    } catch (err) {
+      console.error("Error updating price:", err);
+      alert(err.message || "Failed to update price");
+      return false;
+    }
+  };
+
+  // Start editing price for an item
+  const startEditingPrice = (itemId, currentPrice) => {
+    setEditingPriceForItem(itemId);
+    setEditedPrice(currentPrice.toString());
+  };
+
+  // Handle price input change
+  const handlePriceInputChange = (e) => {
+    setEditedPrice(e.target.value);
+  };
+
+  // Handle price input blur (save on click outside or enter)
+  const handlePriceInputBlur = (itemId) => {
+    if (editedPrice.trim() !== "") {
+      updatePriceInCart(itemId, editedPrice);
+    } else {
+      setEditingPriceForItem(null);
+      setEditedPrice("");
+    }
+  };
+
+  // Handle price input key press (save on Enter)
+  const handlePriceInputKeyPress = (e, itemId) => {
+    if (e.key === 'Enter') {
+      if (editedPrice.trim() !== "") {
+        updatePriceInCart(itemId, editedPrice);
+      }
+    } else if (e.key === 'Escape') {
+      setEditingPriceForItem(null);
+      setEditedPrice("");
+    }
+  };
+
   // Update credit period for individual item
   const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) => {
     try {
@@ -195,42 +264,32 @@ function CartPage() {
 
   // CALCULATION FUNCTIONS - Same as Cart component
   const calculateItemBreakdown = (item) => {
-    const product = productDetails[item.product_id] || {};
-    const price = product.price || item.price || 0;
-    const gstRate = product.gst_rate || 0;
-    const isInclusiveGST = product.inclusive_gst === "Inclusive";
+    // Use price from cart item if available, otherwise from product details
+    const price = parseFloat(item.price) || productDetails[item.product_id]?.price || 0;
+    const gstRate = productDetails[item.product_id]?.gst_rate || 0;
+    const isInclusiveGST = productDetails[item.product_id]?.inclusive_gst === "Inclusive";
     const quantity = item.quantity || 1;
     const creditMultiplier = item.credit_percentage ? (1 + (item.credit_percentage / 100)) : 1;
     const creditPercentage = item.credit_percentage || 0;
-    const userDiscountPercentage = parseFloat(discount) || 0; // Using the discount from state
+    const userDiscountPercentage = parseFloat(discount) || 0;
 
     // FOR INCLUSIVE GST
     if (isInclusiveGST) {
-      // Step 1: Extract base amount from price (which includes GST)
       const baseAmountPerUnit = price / (1 + (gstRate / 100));
-      
-      // Step 2: Apply credit charge per unit
       const priceAfterCreditPerUnit = baseAmountPerUnit * creditMultiplier;
       const creditChargePerUnit = priceAfterCreditPerUnit - baseAmountPerUnit;
       
-      // Step 3: Calculate total for quantity
       const totalBaseAmount = baseAmountPerUnit * quantity;
       const totalCreditCharges = creditChargePerUnit * quantity;
       const totalAmountAfterCredit = totalBaseAmount + totalCreditCharges;
       
-      // Step 4: Apply user discount
       let discountAmount = 0;
       if (userDiscountPercentage > 0) {
         discountAmount = (totalAmountAfterCredit * userDiscountPercentage) / 100;
       }
       
-      // Step 5: Calculate taxable amount
       const taxableAmount = totalAmountAfterCredit - discountAmount;
-      
-      // Step 6: Calculate tax amount on taxable amount
       const taxAmount = (taxableAmount * gstRate) / 100;
-      
-      // Step 7: Final total
       const finalPayableAmount = taxableAmount + taxAmount;
 
       return {
@@ -301,18 +360,6 @@ function CartPage() {
     }
   };
 
-  // Calculate item total
-  const calculateItemTotal = (item) => {
-    const breakdown = calculateItemBreakdown(item);
-    return breakdown.finalPayableAmount;
-  };
-
-  // Calculate item discount
-  const calculateItemDiscount = (item) => {
-    const breakdown = calculateItemBreakdown(item);
-    return breakdown.discountAmount;
-  };
-
   // Calculate totals for the entire cart
   const calculateCartTotals = () => {
     let subtotal = 0;
@@ -345,14 +392,13 @@ function CartPage() {
 
   const totals = calculateCartTotals();
 
-  // Proceed to checkout - Updated with all breakdown data
+  // Proceed to checkout
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
       alert("Cart is empty. Add items before checkout.");
       return;
     }
 
-    // Prepare cart items with full breakdown for checkout
     const checkoutItems = cartItems.map(item => {
       const breakdown = calculateItemBreakdown(item);
       const product = productDetails[item.product_id] || {};
@@ -360,10 +406,9 @@ function CartPage() {
       return {
         ...item,
         item_name: product.name || `Product ${item.product_id}`,
-        price: product.price || item.price || 0,
+        price: item.price || product.price || 0,
         gst_rate: product.gst_rate || 0,
         inclusive_gst: product.inclusive_gst || "Exclusive",
-        // Include full breakdown for checkout calculations
         breakdown: {
           ...breakdown,
           productDetails: product
@@ -380,7 +425,6 @@ function CartPage() {
         staffId: userRole === 'staff' ? staffId : null,
         userRole,
         totals: totals,
-        // Add credit breakdown for reference
         creditBreakdown: {
           subtotal: totals.subtotal,
           totalCreditCharges: totals.totalCreditCharges,
@@ -402,21 +446,6 @@ function CartPage() {
         customerName
       }
     });
-  };
-
-  // Helper function for credit period display
-  const getCreditPeriodDisplay = (item) => {
-    if (!item.credit_period && item.credit_period !== 0) return "Select Credit Period";
-    
-    if (item.credit_period === 0) return "No Credit Period";
-    
-    const period = creditPeriods.find(cp => 
-      cp.credit_period === parseInt(item.credit_period)
-    );
-    if (period) {
-      return `${period.credit_period} days (+${period.credit_percentage}%)`;
-    }
-    return `${item.credit_period} days`;
   };
 
   return (
@@ -494,7 +523,7 @@ function CartPage() {
           </div>
         )}
 
-        {/* Cart Items with Credit Period Selection */}
+        {/* Cart Items with Price Editing */}
         {!loading && cartItems.length > 0 && (
           <div className="cart-items-container">
             <h2>Cart Items ({cartItems.length})</h2>
@@ -514,9 +543,39 @@ function CartPage() {
                 return (
                   <div key={item.id} className="cart-item-card">
                     <div className="item-main-info">
-                      <h4>{product.name || `Product ${item.product_id}`}</h4>
+                      <div className="item-header">
+                        <h4>{product.name || `Product ${item.product_id}`}</h4>
+                        
+                        {/* Price Display/Edit - Click to edit */}
+                        <div className="price-edit-container">
+                          {editingPriceForItem === item.id ? (
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={editedPrice}
+                              onChange={handlePriceInputChange}
+                              onBlur={() => handlePriceInputBlur(item.id)}
+                              onKeyDown={(e) => handlePriceInputKeyPress(e, item.id)}
+                              className="price-edit-input"
+                              autoFocus
+                              placeholder="Enter price"
+                            />
+                          ) : (
+                            <div 
+                              className="price-display clickable-price"
+                              onClick={() => startEditingPrice(item.id, breakdown.basePrice)}
+                              title="Click to edit price"
+                            >
+                              <span className="price-label">Price: </span>
+                              <span className="price-value">₹{breakdown.basePrice.toLocaleString('en-IN')}</span>
+                              <span className="price-edit-hint">✏️</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
                       <div className="item-details">
-                        <span className="price">₹{breakdown.basePrice.toLocaleString('en-IN')}</span>
                         {product.unit && <span className="unit">/{product.unit}</span>}
                         <span className={`gst-badge ${breakdown.isInclusiveGST ? 'inclusive' : 'exclusive'}`}>
                           {breakdown.isInclusiveGST ? 'Incl. GST' : 'Excl. GST'} {breakdown.gstRate}%

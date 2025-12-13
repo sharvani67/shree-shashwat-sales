@@ -191,65 +191,73 @@ function PlaceSalesOrder() {
     return matchesCategory && matchesSearch;
   });
 
-  // Add product to cart via backend
-  const addToCart = async (product) => {
-    try {
-      // First check if product is already in cart
-      const existingItem = cart.find(item => item.product_id === product.id);
-      
-      // Get logged-in user info
-      const storedData = localStorage.getItem("user");
-      const user = storedData ? JSON.parse(storedData) : null;
-      
-      if (existingItem) {
-        // Update quantity
-        const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${existingItem.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            quantity: existingItem.quantity + 1 
-          }),
-        });
 
-        if (!response.ok) throw new Error("Failed to update quantity");
-      } else {
-        // Add new item with NO credit period by default
-        const requestBody = {
-          customer_id: retailerId,
-          product_id: product.id,
-          quantity: 1,
-          credit_period: 0, // Default no credit period
-          credit_percentage: 0 // Default no credit percentage
-        };
-        
-        // Add staff_id if the user is a staff member
-        if (user?.role === 'staff') {
-          requestBody.staff_id = user.id;
-        }
-        
-        const response = await fetch(`${baseurl}/api/cart/add-to-cart`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        });
+// Add product to cart via backend
+const addToCart = async (product) => {
+  try {
+    // First check if product is already in cart
+    const existingItem = cart.find(item => item.product_id === product.id);
+    
+    // Get logged-in user info
+    const storedData = localStorage.getItem("user");
+    const user = storedData ? JSON.parse(storedData) : null;
+    
+    // Format price to ensure it's a number
+    const productPrice = parseFloat(product.price) || 0;
+    
+    if (existingItem) {
+      // Update quantity
+      const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${existingItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          quantity: existingItem.quantity + 1 
+        }),
+      });
 
-        if (!response.ok) throw new Error("Failed to add to cart");
+      if (!response.ok) throw new Error("Failed to update quantity");
+    } else {
+      // Add new item with price
+      const requestBody = {
+        customer_id: retailerId,
+        product_id: product.id,
+        quantity: 1,
+        price: productPrice,  // Add the product price here
+        credit_period: 0, // Default no credit period
+        credit_percentage: 0 // Default no credit percentage
+      };
+      
+      // Add staff_id if the user is a staff member
+      if (user?.role === 'staff') {
+        requestBody.staff_id = user.id;
       }
+      
+      const response = await fetch(`${baseurl}/api/cart/add-to-cart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
 
-      // Refresh cart from backend
-      const cartResponse = await fetch(`${baseurl}/api/cart/customer-cart/${retailerId}`);
-      const refreshedCart = await cartResponse.json();
-      setCart(refreshedCart || []);
-
-    } catch (err) {
-      console.error("Error adding to cart:", err);
-      alert("Failed to add item to cart");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add to cart");
+      }
     }
-  };
+
+    // Refresh cart from backend
+    const cartResponse = await fetch(`${baseurl}/api/cart/customer-cart/${retailerId}`);
+    const refreshedCart = await cartResponse.json();
+    setCart(refreshedCart || []);
+
+  } catch (err) {
+    console.error("Error adding to cart:", err);
+    alert(err.message || "Failed to add item to cart");
+  }
+};
 
   // Cart count
   const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -385,23 +393,6 @@ function PlaceSalesOrder() {
             </div>
           )}
         </div>
-
-        {/* Category Display */}
-        {/* {selectedCategory !== 'all' && (
-          <div className="selected-category-info">
-            <p>
-              Showing products in: <strong>
-                {categoriesList.find(cat => cat.id === selectedCategory)?.name || selectedCategory}
-              </strong>
-            </p>
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className="view-all-categories-btn"
-            >
-              View All Categories
-            </button>
-          </div>
-        )} */}
 
         {/* Main Content */}
         <div className="staff-order-content">
