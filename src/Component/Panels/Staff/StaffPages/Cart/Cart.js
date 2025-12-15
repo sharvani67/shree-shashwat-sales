@@ -14,6 +14,7 @@ function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [retailerId, setRetailerId] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [retailermail, setMail] = useState("");
   const [staffId, setStaffId] = useState("");
   const [userRole, setUserRole] = useState("");
   const [creditPeriods, setCreditPeriods] = useState([]);
@@ -36,6 +37,7 @@ function CartPage() {
       setRetailerId(location.state.retailerId || "");
       setCustomerName(location.state.customerName || "");
       setDiscount(location.state.discount || 0);
+      setMail(location.state.retailermail || 0);
     }
   }, [location.state]);
 
@@ -421,6 +423,7 @@ function CartPage() {
         retailerId,
         customerName,
         discount,
+        retailermail,
         cartItems: checkoutItems,
         staffId: userRole === 'staff' ? staffId : null,
         userRole,

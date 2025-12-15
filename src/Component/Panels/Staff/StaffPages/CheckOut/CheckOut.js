@@ -12,6 +12,7 @@ function Checkout() {
   const { 
     retailerId, 
     customerName, 
+    retailermail,
     discount, 
     cartItems: initialCartItems, 
     staffId: initialStaffId, 
@@ -253,6 +254,8 @@ const handlePlaceOrder = async () => {
 // ---------------------------------------------------------
 let staffIncentive = 0;
 let assignedStaffName = "Unknown Staff";
+let staffEmail = null;
+
 
 try {
   const staffRes = await fetch(`${baseurl}/accounts/${actualStaffId}`);
@@ -262,6 +265,7 @@ try {
 
     staffIncentive = staffData.incentive_percent || 0;
     assignedStaffName = staffData.name || "Unknown Staff";
+    staffEmail = staffData.email || null; 
   } else {
     console.warn("Failed to fetch staff details from backend");
   }
@@ -280,7 +284,7 @@ try {
     order: {
       order_number: orderNumber,
       customer_id: retailerId,
-      customer_name: customerName || "Walk-in Customer",
+      customer_name: customerName,
       order_total: breakdown.subtotal + breakdown.totalCreditCharges,
       discount_amount: breakdown.totalDiscount,
       taxable_amount: breakdown.subtotal + breakdown.totalCreditCharges - breakdown.totalDiscount,
@@ -292,13 +296,15 @@ try {
       order_mode: orderMode,
       approval_status: "Pending",
       ordered_by: staffName,
-      invoice_number: null,
-      invoice_date: null,
-      invoice_status: 0,
+      // invoice_number: null,
+      // invoice_date: null,
+      // invoice_status: 0,
       order_status: "Pending",
       staffid: actualStaffId,
       assigned_staff: assignedStaffName,
       staff_incentive: staffIncentive,
+      staff_email: staffEmail,
+      retailer_email: retailermail,
     },
     orderItems: cartItems.map(item => {
       const itemBreakdown = calculateItemBreakdown(item);

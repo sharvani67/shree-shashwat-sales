@@ -638,12 +638,13 @@ function MyRetailers() {
     }
   };
 
-  const handlePlaceOrder = (retailerId, discount, retailerName) => {
+  const handlePlaceOrder = (retailerId, discount, retailerName ,retailermail) => {
     navigate("/staff/place-sales-order", { 
       state: { 
         retailerId, 
         discount,
-        customerName: retailerName 
+        customerName: retailerName ,
+        retailermail
       } 
     });
   };
@@ -758,7 +759,7 @@ function MyRetailers() {
                 <div className="my-retailer-actions">
                   <button 
                     className="my-retailer-order-btn"
-                    onClick={() => handlePlaceOrder(retailer.id, retailer.discount, retailer.name)}
+                    onClick={() => handlePlaceOrder(retailer.id, retailer.discount, retailer.name , retailer.email)}
                   >
                     <span className="my-retailer-btn-icon">🛒</span> Place Order
                   </button>
