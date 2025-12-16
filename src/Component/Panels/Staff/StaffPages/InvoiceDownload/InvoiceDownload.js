@@ -206,13 +206,11 @@ function InvoiceDownload() {
                         <FileText size={20} />
                         <h3>{invoice.fileName || `Invoice ${index + 1}`}</h3>
                       </div>
-                      <span className="staff-invoice-badge">PDF</span>
+                      <span className="staff-invoice-badge">{invoice.status}</span>
                     </div>
                     
                     <div className="staff-invoice-card-body">
-                      <p className="staff-invoice-description">
-                        Invoice #{index + 1} for Order {orderNumber}
-                      </p>
+                     
                       
                       <div className="staff-invoice-actions">
                         <button

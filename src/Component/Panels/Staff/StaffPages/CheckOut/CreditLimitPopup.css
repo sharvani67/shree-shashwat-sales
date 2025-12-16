@@ -1,0 +1,90 @@
+.credit-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.credit-popup-card {
+  background: #ffffff;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: popupScale 0.2s ease-in-out;
+}
+
+.credit-popup-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 16px;
+}
+
+.credit-popup-details {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* 🔥 BOOTSTRAP ROW FIX — LOCAL SCOPE ONLY */
+.credit-popup-details .row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.credit-popup-details .row > * {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: auto !important;       /* 👈 critical fix */
+  max-width: none !important;
+  flex-shrink: 1;
+}
+
+/* Status colors */
+.credit-popup-details .row.success {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.credit-popup-details .row.danger {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.credit-popup-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-ok {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-ok:hover {
+  background: #b91c1c;
+}
+
+@keyframes popupScale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

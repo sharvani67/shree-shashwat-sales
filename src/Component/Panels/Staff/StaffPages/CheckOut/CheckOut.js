@@ -4,22 +4,48 @@ import { useNavigate, useLocation } from "react-router-dom";
 import StaffMobileLayout from "../StaffMobileLayout/StaffMobileLayout";
 import { baseurl } from "../../../../BaseURL/BaseURL";
 import "./CheckOut.css";
+import CreditLimitPopup from "./CreditLimitPopup";
 
 function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const { 
-    retailerId, 
-    customerName, 
+  const [retailerDetails, setRetailerDetails] = useState(null);
+  const [showCreditPopup, setShowCreditPopup] = useState(false);
+
+  const {
+    retailerId,
+    customerName,
     retailermail,
-    discount, 
-    cartItems: initialCartItems, 
-    staffId: initialStaffId, 
+    discount,
+    cartItems: initialCartItems,
+    staffId: initialStaffId,
     userRole,
     totals: initialTotals,
     creditBreakdown: initialCreditBreakdown
   } = location.state || {};
+
+
+  useEffect(() => {
+    const fetchRetailerDetails = async () => {
+      if (!retailerId) return;
+
+      try {
+        const res = await fetch(`${baseurl}/accounts/${retailerId}`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log("Retailer Details:", data);
+          setRetailerDetails(data);
+        } else {
+          console.warn("Failed to fetch retailer details");
+        }
+      } catch (err) {
+        console.error("Error fetching retailer:", err);
+      }
+    };
+
+    fetchRetailerDetails();
+  }, [retailerId]);
+
 
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -51,7 +77,7 @@ function Checkout() {
     if (cartItems.length > 0) {
       const recalculatedTotals = calculateTotals();
       setTotals(recalculatedTotals);
-      
+
       const recalculatedCreditBreakdown = calculateCreditBreakdown();
       setCreditBreakdown(recalculatedCreditBreakdown);
     }
@@ -72,28 +98,28 @@ function Checkout() {
     if (isInclusiveGST) {
       // Step 1: Extract base amount from price (which includes GST)
       const baseAmountPerUnit = price / (1 + (gstRate / 100));
-      
+
       // Step 2: Apply credit charge per unit
       const priceAfterCreditPerUnit = baseAmountPerUnit * creditMultiplier;
       const creditChargePerUnit = priceAfterCreditPerUnit - baseAmountPerUnit;
-      
+
       // Step 3: Calculate total for quantity
       const totalBaseAmount = baseAmountPerUnit * quantity;
       const totalCreditCharges = creditChargePerUnit * quantity;
       const totalAmountAfterCredit = totalBaseAmount + totalCreditCharges;
-      
+
       // Step 4: Apply user discount
       let discountAmount = 0;
       if (userDiscountPercentage > 0) {
         discountAmount = (totalAmountAfterCredit * userDiscountPercentage) / 100;
       }
-      
+
       // Step 5: Calculate taxable amount
       const taxableAmount = totalAmountAfterCredit - discountAmount;
-      
+
       // Step 6: Calculate tax amount on taxable amount
       const taxAmount = (taxableAmount * gstRate) / 100;
-      
+
       // Step 7: Final total
       const finalPayableAmount = taxableAmount + taxAmount;
 
@@ -105,7 +131,7 @@ function Checkout() {
         creditMultiplier,
         creditPercentage,
         userDiscountPercentage,
-        
+
         totalBaseAmount,
         totalCreditCharges,
         discountAmount,
@@ -114,22 +140,22 @@ function Checkout() {
         finalPayableAmount
       };
     }
-    
+
     // FOR EXCLUSIVE GST
     else {
       const baseAmountPerUnit = price;
       const priceAfterCreditPerUnit = baseAmountPerUnit * creditMultiplier;
       const creditChargePerUnit = priceAfterCreditPerUnit - baseAmountPerUnit;
-      
+
       const totalBaseAmount = baseAmountPerUnit * quantity;
       const totalCreditCharges = creditChargePerUnit * quantity;
       const totalAmountAfterCredit = totalBaseAmount + totalCreditCharges;
-      
+
       let discountAmount = 0;
       if (userDiscountPercentage > 0) {
         discountAmount = (totalAmountAfterCredit * userDiscountPercentage) / 100;
       }
-      
+
       const taxableAmount = totalAmountAfterCredit - discountAmount;
       const taxAmount = (taxableAmount * gstRate) / 100;
       const finalPayableAmount = taxableAmount + taxAmount;
@@ -142,7 +168,7 @@ function Checkout() {
         creditMultiplier,
         creditPercentage,
         userDiscountPercentage,
-        
+
         totalBaseAmount,
         totalCreditCharges,
         discountAmount,
@@ -183,9 +209,9 @@ function Checkout() {
   // Calculate totals if not passed
   const calculateTotals = () => {
     if (initialTotals) return initialTotals;
-    
+
     const breakdown = calculateCreditBreakdown();
-    
+
     return {
       subtotal: breakdown.subtotal,
       creditCharges: breakdown.totalCreditCharges,
@@ -197,193 +223,204 @@ function Checkout() {
 
   // Calculate average credit period
   const calculateAverageCreditPeriod = () => {
-    const totalPeriod = cartItems.reduce((sum, item) => 
+    const totalPeriod = cartItems.reduce((sum, item) =>
       sum + (parseInt(item.credit_period) || 0), 0);
     return cartItems.length > 0 ? Math.round(totalPeriod / cartItems.length) : 0;
   };
 
+  const creditLimit = Number(retailerDetails?.credit_limit) || 0;
+  const unpaidAmount = Number(retailerDetails?.unpaid_amount) || 0;
+  const orderTotal = Number(creditBreakdown?.finalTotal) || 0;
+  const creditBalance = creditLimit - unpaidAmount;
+
 
   // Enhanced place order function with all calculations
-const handlePlaceOrder = async () => {
-  if (!retailerId || !cartItems || cartItems.length === 0) {
-    alert("Missing required information");
-    return;
-  }
+  const handlePlaceOrder = async () => {
+    if (!retailerId || !cartItems || cartItems.length === 0) {
+      alert("Missing required information");
+      return;
+    }
 
-  // Get staff info from localStorage
-  const storedData = localStorage.getItem("user");
-  let loggedInUser = null;
-  let actualStaffId = initialStaffId;
-  let staffName = null;
-  let assignedStaff = null;
-  let staffIdFromStorage = null;
+    if (orderTotal > creditBalance) {
+      setShowCreditPopup(true);
+      return;
+    }
 
-  if (storedData) {
-    try {
-      loggedInUser = JSON.parse(storedData);
-      console.log("Logged in user data:", loggedInUser);
-      
-      // Extract user information
-      staffName = loggedInUser.name || "Staff Member";
-      staffIdFromStorage = loggedInUser.id;
-      assignedStaff = loggedInUser.assigned_staff || loggedInUser.supervisor_name || staffName;
-      
-      // Use staff ID from localStorage if not provided in state
-      if (!actualStaffId && staffIdFromStorage) {
-        actualStaffId = staffIdFromStorage;
-        console.log("Using staff ID from localStorage:", actualStaffId);
+
+    // Get staff info from localStorage
+    const storedData = localStorage.getItem("user");
+    let loggedInUser = null;
+    let actualStaffId = initialStaffId;
+    let staffName = null;
+    let assignedStaff = null;
+    let staffIdFromStorage = null;
+
+    if (storedData) {
+      try {
+        loggedInUser = JSON.parse(storedData);
+        console.log("Logged in user data:", loggedInUser);
+
+        // Extract user information
+        staffName = loggedInUser.name || "Staff Member";
+        staffIdFromStorage = loggedInUser.id;
+        assignedStaff = loggedInUser.assigned_staff || loggedInUser.supervisor_name || staffName;
+
+        // Use staff ID from localStorage if not provided in state
+        if (!actualStaffId && staffIdFromStorage) {
+          actualStaffId = staffIdFromStorage;
+          console.log("Using staff ID from localStorage:", actualStaffId);
+        }
+
+        console.log("Staff Name:", staffName);
+        console.log("Assigned Staff:", assignedStaff);
+
+      } catch (err) {
+        console.error("Error parsing user data:", err);
       }
-      
-      console.log("Staff Name:", staffName);
-      console.log("Assigned Staff:", assignedStaff);
-      
-    } catch (err) {
-      console.error("Error parsing user data:", err);
     }
-  }
 
-  if (!actualStaffId) {
-    alert("Staff ID is required. Please log in again.");
-    return;
-  }
+    if (!actualStaffId) {
+      alert("Staff ID is required. Please log in again.");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  // ---------------------------------------------------------
-// 1. Fetch Staff Details From Backend (accounts/:id)
-// ---------------------------------------------------------
-let staffIncentive = 0;
-let assignedStaffName = "Unknown Staff";
-let staffEmail = null;
-
-
-try {
-  const staffRes = await fetch(`${baseurl}/accounts/${actualStaffId}`);
-  if (staffRes.ok) {
-    const staffData = await staffRes.json();
-    console.log("Fetched Staff Data:", staffData);
-
-    staffIncentive = staffData.incentive_percent || 0;
-    assignedStaffName = staffData.name || "Unknown Staff";
-    staffEmail = staffData.email || null; 
-  } else {
-    console.warn("Failed to fetch staff details from backend");
-  }
-} catch (error) {
-  console.error("Error fetching staff details:", error);
-}
+    // ---------------------------------------------------------
+    // 1. Fetch Staff Details From Backend (accounts/:id)
+    // ---------------------------------------------------------
+    let staffIncentive = 0;
+    let assignedStaffName = "Unknown Staff";
+    let staffEmail = null;
 
 
-  // Generate order number
-  const orderNumber = `ORD${Date.now()}`;
-  const averageCreditPeriod = calculateAverageCreditPeriod();
-  const breakdown = calculateCreditBreakdown();
+    try {
+      const staffRes = await fetch(`${baseurl}/accounts/${actualStaffId}`);
+      if (staffRes.ok) {
+        const staffData = await staffRes.json();
+        console.log("Fetched Staff Data:", staffData);
 
-  // Prepare order data in the format backend expects
-  const orderData = {
-    order: {
-      order_number: orderNumber,
-      customer_id: retailerId,
-      customer_name: customerName,
-      order_total: breakdown.subtotal + breakdown.totalCreditCharges,
-      discount_amount: breakdown.totalDiscount,
-      taxable_amount: breakdown.subtotal + breakdown.totalCreditCharges - breakdown.totalDiscount,
-      tax_amount: breakdown.totalTax,
-      net_payable: breakdown.finalTotal,
-      credit_period: averageCreditPeriod,
-      estimated_delivery_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
-      order_placed_by: actualStaffId,
-      order_mode: orderMode,
-      approval_status: "Pending",
-      ordered_by: staffName,
-      // invoice_number: null,
-      // invoice_date: null,
-      // invoice_status: 0,
-      order_status: "Pending",
-      staffid: actualStaffId,
-      assigned_staff: assignedStaffName,
-      staff_incentive: staffIncentive,
-      staff_email: staffEmail,
-      retailer_email: retailermail,
-    },
-    orderItems: cartItems.map(item => {
-      const itemBreakdown = calculateItemBreakdown(item);
-      const product = item.productDetails || {};
-      const gstRate = parseFloat(product.gst_rate) || 0;
-      
-      // Split GST 50/50 for SGST and CGST
-      const sgstPercentage = gstRate / 2;
-      const cgstPercentage = gstRate / 2;
-      const sgstAmount = itemBreakdown.taxAmount / 2;
-      const cgstAmount = itemBreakdown.taxAmount / 2;
-      
-      const mrp = parseFloat(item.mrp) || itemBreakdown.basePrice;
-      const salePrice = parseFloat(item.sale_price) || itemBreakdown.basePrice;
-      const priceAfterCredit = itemBreakdown.basePrice * itemBreakdown.creditMultiplier;
+        staffIncentive = staffData.incentive_percent || 0;
+        assignedStaffName = staffData.name || "Unknown Staff";
+        staffEmail = staffData.email || null;
+      } else {
+        console.warn("Failed to fetch staff details from backend");
+      }
+    } catch (error) {
+      console.error("Error fetching staff details:", error);
+    }
 
-      return {
+
+    // Generate order number
+    const orderNumber = `ORD${Date.now()}`;
+    const averageCreditPeriod = calculateAverageCreditPeriod();
+    const breakdown = calculateCreditBreakdown();
+
+    // Prepare order data in the format backend expects
+    const orderData = {
+      order: {
         order_number: orderNumber,
-        item_name: item.item_name || product.name || `Product ${item.product_id}`,
-        product_id: item.product_id,
-        mrp: mrp,
-        sale_price: salePrice,
-        price: priceAfterCredit,
-        quantity: item.quantity || 1,
-        total_amount: itemBreakdown.totalBaseAmount + itemBreakdown.totalCreditCharges,
-        discount_percentage: discount,
-        discount_amount: itemBreakdown.discountAmount,
-        taxable_amount: itemBreakdown.taxableAmount,
-        tax_percentage: gstRate,
-        tax_amount: itemBreakdown.taxAmount,
-        item_total: itemBreakdown.finalPayableAmount,
-        credit_period: item.credit_period || 0,
-        credit_percentage: item.credit_percentage || 0,
-        sgst_percentage: sgstPercentage,
-        sgst_amount: sgstAmount,
-        cgst_percentage: cgstPercentage,
-        cgst_amount: cgstAmount,
-        discount_applied_scheme: discount > 0 ? 'user_discount' : null
-      };
-    })
-  };
-
-  console.log("Sending order data:", JSON.stringify(orderData, null, 2));
-
-  try {
-    const response = await fetch(`${baseurl}/orders/create-complete-order`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+        customer_id: retailerId,
+        customer_name: retailerDetails.name,
+        order_total: breakdown.subtotal + breakdown.totalCreditCharges,
+        discount_amount: breakdown.totalDiscount,
+        taxable_amount: breakdown.subtotal + breakdown.totalCreditCharges - breakdown.totalDiscount,
+        tax_amount: breakdown.totalTax,
+        net_payable: breakdown.finalTotal,
+        credit_period: averageCreditPeriod,
+        estimated_delivery_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+        order_placed_by: actualStaffId,
+        order_mode: orderMode,
+        approval_status: "Pending",
+        ordered_by: staffName,
+        // invoice_number: null,
+        // invoice_date: null,
+        // invoice_status: 0,
+        order_status: "Pending",
+        staffid: actualStaffId,
+        assigned_staff: assignedStaffName,
+        staff_incentive: staffIncentive,
+        staff_email: staffEmail,
+        retailer_email: retailerDetails.email,
       },
-      body: JSON.stringify(orderData),
-    });
+      orderItems: cartItems.map(item => {
+        const itemBreakdown = calculateItemBreakdown(item);
+        const product = item.productDetails || {};
+        const gstRate = parseFloat(product.gst_rate) || 0;
 
-    const result = await response.json();
-    console.log("Order response:", result);
+        // Split GST 50/50 for SGST and CGST
+        const sgstPercentage = gstRate / 2;
+        const cgstPercentage = gstRate / 2;
+        const sgstAmount = itemBreakdown.taxAmount / 2;
+        const cgstAmount = itemBreakdown.taxAmount / 2;
 
-    if (response.ok && result.success) {
-      setOrderDetails({
-        orderNumber: result.order_number || orderData.order.order_number,
-        orderId: result.order_id,
-        amount: breakdown.finalTotal,
-        customerName: customerName || "Walk-in Customer",
-        staffId: actualStaffId,
-        staffName: staffName,
-        date: new Date().toLocaleDateString(),
-        orderMode: orderMode,
-        breakdown: breakdown
-      });
-      setOrderPlaced(true);
-    } else {
-      throw new Error(result.error || result.details || result.message || "Failed to place order");
-    }
-  } catch (error) {
-    console.error("Error placing order:", error);
-    alert(`Order failed: ${error.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+        const mrp = parseFloat(item.mrp) || itemBreakdown.basePrice;
+        const salePrice = parseFloat(item.sale_price) || itemBreakdown.basePrice;
+        const priceAfterCredit = itemBreakdown.basePrice * itemBreakdown.creditMultiplier;
+
+        return {
+          order_number: orderNumber,
+          item_name: item.item_name || product.name || `Product ${item.product_id}`,
+          product_id: item.product_id,
+          mrp: mrp,
+          sale_price: salePrice,
+          price: priceAfterCredit,
+          quantity: item.quantity || 1,
+          total_amount: itemBreakdown.totalBaseAmount + itemBreakdown.totalCreditCharges,
+          discount_percentage: discount,
+          discount_amount: itemBreakdown.discountAmount,
+          taxable_amount: itemBreakdown.taxableAmount,
+          tax_percentage: gstRate,
+          tax_amount: itemBreakdown.taxAmount,
+          item_total: itemBreakdown.finalPayableAmount,
+          credit_period: item.credit_period || 0,
+          credit_percentage: item.credit_percentage || 0,
+          sgst_percentage: sgstPercentage,
+          sgst_amount: sgstAmount,
+          cgst_percentage: cgstPercentage,
+          cgst_amount: cgstAmount,
+          discount_applied_scheme: discount > 0 ? 'user_discount' : null
+        };
+      })
+    };
+
+    console.log("Sending order data:", JSON.stringify(orderData, null, 2));
+
+    // try {
+    //   const response = await fetch(`${baseurl}/orders/create-complete-order`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(orderData),
+    //   });
+
+    //   const result = await response.json();
+    //   console.log("Order response:", result);
+
+    //   if (response.ok && result.success) {
+    //     setOrderDetails({
+    //       orderNumber: result.order_number || orderData.order.order_number,
+    //       orderId: result.order_id,
+    //       amount: breakdown.finalTotal,
+    //       customerName: customerName || "Walk-in Customer",
+    //       staffId: actualStaffId,
+    //       staffName: staffName,
+    //       date: new Date().toLocaleDateString(),
+    //       orderMode: orderMode,
+    //       breakdown: breakdown
+    //     });
+    //     setOrderPlaced(true);
+    //   } else {
+    //     throw new Error(result.error || result.details || result.message || "Failed to place order");
+    //   }
+    // } catch (error) {
+    //   console.error("Error placing order:", error);
+    //   alert(`Order failed: ${error.message}`);
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
 
   const handleBackToCart = () => {
     navigate("/staff/cart", {
@@ -408,7 +445,7 @@ try {
           <div className="order-success-container">
             <div className="success-icon">✅</div>
             <h2>Order Placed Successfully!</h2>
-            
+
             <div className="order-details-card">
               <h3>Order Details</h3>
               <div className="order-detail-row">
@@ -483,7 +520,7 @@ try {
       <div className="checkout-page">
         {/* Header */}
         <div className="checkout-header">
-          <button 
+          <button
             className="back-btn"
             onClick={handleBackToCart}
           >
@@ -513,7 +550,7 @@ try {
             </button>
           </div>
           <p className="order-mode-note">
-            {orderMode === 'KACHA' 
+            {orderMode === 'KACHA'
               ? 'KACHA: Temporary order, invoice will be generated later'
               : 'PAKKA: Complete order with immediate invoice'}
           </p>
@@ -522,33 +559,33 @@ try {
         {/* Order Summary */}
         <div className="order-summary-section">
           <h2>Order Summary</h2>
-          
+
           <div className="summary-item">
             <span>Subtotal ({cartItems.length} items):</span>
             <span>₹{creditBreakdown.subtotal?.toLocaleString() || '0'}</span>
           </div>
-          
+
           {creditBreakdown.totalCreditCharges > 0 && (
             <div className="summary-item credit">
               <span>Credit Charges:</span>
               <span>+₹{creditBreakdown.totalCreditCharges?.toLocaleString() || '0'}</span>
             </div>
           )}
-          
+
           {discount > 0 && (
             <div className="summary-item discount">
               <span>Discount ({discount}%):</span>
               <span>-₹{creditBreakdown.totalDiscount?.toLocaleString() || '0'}</span>
             </div>
           )}
-          
+
           {creditBreakdown.totalTax > 0 && (
             <div className="summary-item tax">
               <span>GST:</span>
               <span>+₹{creditBreakdown.totalTax?.toLocaleString() || '0'}</span>
             </div>
           )}
-          
+
           <div className="summary-item total">
             <span>Final Total:</span>
             <strong>₹{creditBreakdown.finalTotal?.toLocaleString() || totals?.finalTotal?.toLocaleString() || '0'}</strong>
@@ -563,7 +600,7 @@ try {
 
         {/* Place Order Button */}
         <div className="place-order-section">
-          <button 
+          <button
             onClick={handlePlaceOrder}
             disabled={loading || !cartItems || cartItems.length === 0}
             className={`place-order-btn ${loading ? 'loading' : ''}`}
@@ -574,6 +611,17 @@ try {
             Note: Order will be placed under staff ID: {initialStaffId || "Current User"} as {orderMode} order
           </p> */}
         </div>
+
+<CreditLimitPopup
+  open={showCreditPopup}
+  onClose={() => setShowCreditPopup(false)}
+  creditLimit={creditLimit}
+  unpaidAmount={unpaidAmount}
+  creditBalance={creditBalance}
+  orderTotal={orderTotal}
+/>
+
+
       </div>
     </StaffMobileLayout>
   );
