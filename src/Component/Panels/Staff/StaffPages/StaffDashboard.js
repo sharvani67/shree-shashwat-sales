@@ -158,11 +158,11 @@ function StaffDashboard() {
 
             <div className="action-cards">
 
-                <Link to="/staff/offers" className="action-card">
+                <Link to="/staff/pending-invoices" className="action-card">
                 <div className="action-icon">🏷️</div>
                 <div className="action-content">
-                  <h3>Offers </h3>
-                  <p>View All Offers </p>
+                  <h3>Invoices </h3>
+                  <p>View All Invoices </p>
                 </div>
               </Link>
               <Link to="/staff/log-visit" className="action-card">

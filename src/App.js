@@ -32,6 +32,7 @@ import OrderFullDetails from "./Component/Panels/Staff/StaffPages/PlaceOrder/Ord
 import ProfilePage from "./Component/Panels/Staff/StaffPages/StaffMobileLayout/ProfilePage";
 import StaffInventory from "./Component/Panels/Staff/StaffPages/Inventory"; // Adjust path as needed
 import InvoiceDownload from "./Component/Panels/Staff/StaffPages/InvoiceDownload/InvoiceDownload";
+import PendingInvoices from "./Component/Panels/Staff/StaffPages/PendingInvoices/PendingInvoices";
 
 
 
@@ -68,7 +69,7 @@ function App() {
         <Route path="/staff_expensive" element={<Staff_expensive />} />
         <Route path="/staff_add_expensive" element={<Staff_Add_expensive />} />
         <Route path="/staff/invoices" element={<InvoiceDownload />} />
-
+<Route path="/staff/pending-invoices" element={<PendingInvoices />} />
         <Route
           path="/staff/order-details/:orderNumber"
           element={<OrderFullDetails />}
