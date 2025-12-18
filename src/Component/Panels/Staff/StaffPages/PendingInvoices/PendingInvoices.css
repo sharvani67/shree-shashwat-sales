@@ -695,7 +695,7 @@
   .staff-pending-invoice-info-row {
     flex-direction: column;
     gap: 8px;
-    align-items: flex-start;
+   
   }
   
   .staff-pending-invoice-info-item {
