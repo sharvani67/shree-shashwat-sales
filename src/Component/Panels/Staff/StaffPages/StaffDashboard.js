@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import StaffMobileLayout from "../../Staff/StaffPages/StaffMobileLayout/StaffMobileLayout";
+import SalespersonScores from "../../Staff/StaffPages/SalesPersonScore/SalesPersonScore"; // Add this import
 import "./StaffDashboard.css";
 import { Link } from "react-router-dom";
 import { baseurl } from "../../../BaseURL/BaseURL";
@@ -151,20 +152,23 @@ function StaffDashboard() {
             </div>
           </div>
 
+          {/* Add the SalespersonScores component here */}
+          <SalespersonScores />
+
           {/* Quick Actions Section */}
           <div className="quick-actions">
             <h2>Quick Actions</h2>
             {/* <p className="section-subtitle">Common tasks and shortcuts</p> */}
 
             <div className="action-cards">
-
-                <Link to="/staff/pending-invoices" className="action-card">
+              <Link to="/staff/pending-invoices" className="action-card">
                 <div className="action-icon">🏷️</div>
                 <div className="action-content">
-                  <h3>Invoices </h3>
-                  <p>View All Invoices </p>
+                  <h3>Invoices</h3>
+                  <p>View All Invoices</p>
                 </div>
               </Link>
+              
               <Link to="/staff/log-visit" className="action-card">
                 <div className="action-icon">📊</div>
                 <div className="action-content">
@@ -172,14 +176,6 @@ function StaffDashboard() {
                   <p>Record your latest retailer visit</p>
                 </div>
               </Link>
-
-              {/* <Link to="/staff_add_expensive" className="action-card">
-                <div className="action-icon">💰</div>
-                <div className="action-content">
-                  <h3>Submit Expense</h3>
-                  <p>Add your daily expenses</p>
-                </div>
-              </Link> */}
 
               <Link to="/staff/add-retailer" className="action-card">
                 <div className="action-icon">🏪</div>

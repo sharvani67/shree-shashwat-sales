@@ -1,0 +1,123 @@
+.sp-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.sp-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Grid */
+.sp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+.sp-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Header */
+.sp-card-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sp-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #9333ea);
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp-name {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.sp-email {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Metrics */
+.sp-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sp-metric span {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.sp-metric strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+/* Progress */
+.sp-progress {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.sp-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+/* Score */
+.sp-score {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.sp-score-good {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sp-score-low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* States */
+.sp-loading,
+.sp-error,
+.sp-no-data {
+  text-align: center;
+  padding: 30px;
+  color: #555;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .sp-metrics {
+    grid-template-columns: 1fr;
+  }
+}
