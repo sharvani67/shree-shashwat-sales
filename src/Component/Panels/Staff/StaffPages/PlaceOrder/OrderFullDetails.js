@@ -165,12 +165,12 @@ function OrderFullDetails() {
       ←
     </button>
     
-    <h1><FiPackage /> Order Details</h1>
+    <h1>Order Details</h1>
     <div className="orderfd-m-order-number">
-      <span className="orderfd-m-order-badge">#{order.order_number}</span>
+      <span className="orderfd-m-order-badge">{order.order_number}</span>
     </div>
   </div>
-  <p className="orderfd-m-subtitle">Complete order information and item breakdown</p>
+  
 </div>
 
         {/* ORDER SUMMARY */}
@@ -184,20 +184,11 @@ function OrderFullDetails() {
               <span className="orderfd-m-info-label"><FiUser /> Customer</span>
               <span className="orderfd-m-info-value">{order.customer_name}</span>
             </div>
-            
-            <div className="orderfd-m-info-item highlight">
-              <span className="orderfd-m-info-label"><FiDollarSign /> Order Total</span>
-              <span className="orderfd-m-info-value">₹ {formatCurrency(order.order_total)}</span>
-            </div>
+           
             
             <div className="orderfd-m-info-item highlight">
               <span className="orderfd-m-info-label"><FiCreditCard /> Net Payable</span>
               <span className="orderfd-m-info-value">₹ {formatCurrency(order.net_payable)}</span>
-            </div>
-            
-            <div className="orderfd-m-info-item">
-              <span className="orderfd-m-info-label"><FiTag /> Invoice</span>
-              <span className="orderfd-m-info-value">{order.invoice_number}</span>
             </div>
           </div>
           
@@ -221,8 +212,12 @@ function OrderFullDetails() {
             </div>
             
             <div className="orderfd-m-date-item">
-              <span className="orderfd-m-date-label"><FiPercent /> Credit Period</span>
-              <span className="orderfd-m-date-value">{order.credit_period} Days</span>
+              <span className="orderfd-m-date-label"> Credit Charges</span>
+              <span className="orderfd-m-date-value">{order.credit_period}</span>
+            </div>
+            <div className="orderfd-m-date-item">
+              <span className="orderfd-m-date-label"> Discount</span>
+              <span className="orderfd-m-date-value">{order.discount_amount }</span>
             </div>
           </div>
         </div>
@@ -243,17 +238,14 @@ function OrderFullDetails() {
                 </div>
                 
                 <div className="orderfd-m-item-prices">
-                  <div className="orderfd-m-price-row">
-                    <span>MRP</span>
-                    <span className="orderfd-m-price-amount">₹ {formatCurrency(item.mrp)}</span>
-                  </div>
+                  
                   <div className="orderfd-m-price-row">
                     <span>Sale Price</span>
                     <span className="orderfd-m-price-amount">₹ {formatCurrency(item.sale_price)}</span>
                   </div>
                   <div className="orderfd-m-price-row highlight">
                     <span>Final Price</span>
-                    <span className="orderfd-m-price-amount">₹ {formatCurrency(item.price)}</span>
+                    <span className="orderfd-m-price-amount">₹ {formatCurrency(item.final_amount)}</span>
                   </div>
                 </div>
                 
@@ -281,10 +273,7 @@ function OrderFullDetails() {
                     <span className="orderfd-m-meta-label">Tax %</span>
                     <span className="orderfd-m-meta-value">{item.tax_percentage}%</span>
                   </div>
-                  <div className="orderfd-m-meta-item">
-                    <span className="orderfd-m-meta-label">Tax Amount</span>
-                    <span className="orderfd-m-meta-value">₹ {formatCurrency(item.tax_amount)}</span>
-                  </div>
+                  
                   <div className="orderfd-m-meta-item">
                     <span className="orderfd-m-meta-label">Discount</span>
                     <span className="orderfd-m-meta-value">{item.discount_percentage}%</span>
@@ -292,18 +281,6 @@ function OrderFullDetails() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-        
-        {/* FOOTER SUMMARY */}
-        <div className="orderfd-m-footer-summary">
-          <div className="orderfd-m-footer-item">
-            <span>Total Items</span>
-            <span>{items.length}</span>
-          </div>
-          <div className="orderfd-m-footer-item total">
-            <span>Order Total</span>
-            <span>₹ {formatCurrency(order.order_total)}</span>
           </div>
         </div>
       </div>
