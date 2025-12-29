@@ -133,6 +133,7 @@ const handlePlaceOrder = async () => {
       staffIncentive = staffData.incentive_percent || 0;
       assignedStaffName = staffData.name || "Unknown Staff";
       staffEmail = staffData.email || null;
+      staffMobile = staffData.mobile_number || null;
     } else {
       console.warn("Failed to fetch staff details from backend");
     }
@@ -169,9 +170,11 @@ const handlePlaceOrder = async () => {
       order_status: "Pending",
       staffid: actualStaffId,
       assigned_staff: assignedStaffName,
-       staff_incentive: staffIncentive.toString(), // Convert to string
+      staff_incentive: staffIncentive.toString(), // Convert to string
       staff_email: staffEmail,
+      staff_mobile: staffMobile,
       retailer_email: retailerDetails?.email || retailermail,
+      retailer_mobile: retailerDetails?.mobile_number ,
     },
     orderItems: cartItems.map(item => {
       const breakdown = item.breakdown?.perUnit || {};
