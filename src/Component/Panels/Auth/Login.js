@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👁️ Eye icons
+import { FaEye, FaEyeSlash, FaStore, FaShoppingCart, FaChartLine, FaTags } from "react-icons/fa";
+import { MdAccountBalanceWallet } from "react-icons/md";
 import "./Login.css";
 import { baseurl } from "../../BaseURL/BaseURL";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👁️ Password toggle
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -86,64 +89,224 @@ function Login() {
     }
   };
 
+  // Google Login Handler
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError("");
+    
+    try {
+      // Decode Google JWT token
+      const decoded = jwtDecode(credentialResponse.credential);
+      
+      console.log("Google Login Success:", decoded);
+      
+      // Fetch all accounts from the database
+      const response = await fetch(`${baseurl}/accounts`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const accounts = await response.json();
+      
+      // Find account with matching email
+      const matchedAccount = accounts.find(
+        account => account.email && 
+        account.email.toLowerCase() === decoded.email.toLowerCase()
+      );
+      
+      if (matchedAccount) {
+        // Prepare user object from matched account
+        const user = {
+          id: matchedAccount.id,
+          name: matchedAccount.name || decoded.name,
+          email: matchedAccount.email,
+          role: matchedAccount.role || "customer",
+          mobile_number: matchedAccount.mobile_number,
+          business_name: matchedAccount.business_name,
+          // Include any other necessary fields
+          ...matchedAccount
+        };
+        
+        // Store user data
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("loginTime", new Date().toISOString());
+
+        // Role-based navigation and flags
+        const userRole = user.role?.toLowerCase() || "customer";
+        
+        if (userRole === "admin") {
+          localStorage.setItem("isAdmin", "true");
+          navigate("/admindashboard");
+        } else if (userRole === "staff") {
+          localStorage.setItem("isStaff", "true");
+          navigate("/staffdashboard");
+        } else if (userRole === "retailer") {
+          localStorage.setItem("isRetailer", "true");
+          navigate("/retailerdashboard");
+        } else {
+          // Default dashboard for other roles/customers
+          navigate("/dashboard");
+        }
+        
+      } else {
+        // Email not found in accounts
+        setError("Email not registered. Please contact administrator.");
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("Google login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login failed. Please try again.");
+  };
+
   return (
     <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Welcome Back 👋</h2>
+      {/* Decorative Background Elements */}
+      <div className="sales-bg-elements">
+        <div className="bg-icon cart-icon"><FaShoppingCart /></div>
+        <div className="bg-icon chart-icon"><FaChartLine /></div>
+        <div className="bg-icon store-icon"><FaStore /></div>
+        <div className="bg-icon wallet-icon"><MdAccountBalanceWallet /></div>
+        <div className="bg-icon tag-icon"><FaTags /></div>
 
-        {/* Error Message */}
-        {error && <div className="error-message">{error}</div>}
+        {/* Animated floating elements */}
+        <div className="floating-circle circle-1"></div>
+        <div className="floating-circle circle-2"></div>
+        <div className="floating-circle circle-3"></div>
+        <div className="floating-rect rect-1"></div>
+        <div className="floating-rect rect-2"></div>
+      </div>
 
-        {/* Username */}
-        <div className="form-group">
-          <label htmlFor="username">Email or Mobile Number</label>
-          <input
-            type="text"
-            id="username"
-            placeholder="Enter your email or mobile number"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+      {/* Left Side - Branding */}
+      <div className="login-branding">
+        <div className="brand-logo">
+          <FaStore />
         </div>
+        <h1 className="brand-title">RetailSync</h1>
+        <p className="brand-subtitle">Sales & Retail Management Platform</p>
 
-        {/* Password with Eye Toggle */}
-        <div className="form-group password-group">
-          <label htmlFor="password">Password</label>
-          <div className="password-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <span
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
+        <div className="features-list">
+          <div className="feature-item">
+            <span className="feature-icon">📊</span>
+            <span>Real-time Analytics</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon">📈</span>
+            <span>Sales Tracking</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon">🛒</span>
+            <span>Inventory Management</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon">👥</span>
+            <span>Customer Insights</span>
           </div>
         </div>
+      </div>
 
-        {/* Forgot Password */}
-        <div className="forgot-password-link">
-          Forgot Password?{" "}
-          <Link
-            to="/forgot-password"
-            state={{ email: username.includes("@") ? username : "" }}
-          >
-            Reset Here
-          </Link>
-        </div>
+      {/* Right Side - Login Form */}
+      <div className="login-wrapper">
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-header">
+            <h2>Welcome Back! 👋</h2>
+          </div>
 
-        {/* Submit Button */}
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          {/* Error Message */}
+          {error && <div className="error-message">{error}</div>}
+
+          {/* Username */}
+          <div className="form-group">
+            <label htmlFor="username">
+              <span className="label-icon">📧</span>
+              Email or Mobile Number
+            </label>
+            <input
+              type="text"
+              id="username"
+              placeholder="retailer@example.com or +91 9876543210"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="form-input"
+            />
+          </div>
+
+          {/* Password with Eye Toggle */}
+          <div className="form-group password-group">
+            <label htmlFor="password">
+              <span className="label-icon">🔒</span>
+              Password
+            </label>
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="form-input"
+              />
+              <span
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+          </div>
+
+          {/* Forgot Password & Remember Me */}
+          <div className="form-options">
+            <div className="remember-me">
+              <input type="checkbox" id="remember" />
+              <label htmlFor="remember">Remember me</label>
+            </div>
+            <div className="forgot-password-link">
+              <Link to="/forgot-password" state={{ email: username.includes("@") ? username : "" }}>
+                Forgot Password?
+              </Link>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button type="submit" disabled={loading} className="login-button">
+            {loading ? (
+              <span className="button-loading">
+                <span className="spinner"></span>
+                Logging in...
+              </span>
+            ) : (
+              "Login to Dashboard"
+            )}
+          </button>
+
+          {/* Google Login */}
+          <div className="google-login-section">
+            <div className="divider">
+              <span>Or continue with</span>
+            </div>
+            
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              width="100%"
+            />
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

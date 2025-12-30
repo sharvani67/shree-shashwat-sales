@@ -180,7 +180,7 @@ function StaffOrders() {
 
                   {/* Order Info */}
                   <div className="orders-m-info">
-                    <p className="orders-m-amount">Amount: ₹ {order.order_total}</p>
+                    <p className="orders-m-amount">Amount: ₹ {order.net_payable}</p>
                     <p className="orders-m-credit">
                       Customer: {order.customer_name}
                     </p>

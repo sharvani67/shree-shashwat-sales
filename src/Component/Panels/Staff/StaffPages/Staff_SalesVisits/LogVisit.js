@@ -233,7 +233,7 @@ function LogVisit() {
               onChange={handleInputChange}
             >
               <option value="">Select transaction type</option>
-              <option value="Paikka">Pakka</option>
+              <option value="Pakka">Pakka</option>
               <option value="Kaccha">Kaccha</option>
               <option value="Partial">Partial</option>
               <option value="Full">Full</option>
