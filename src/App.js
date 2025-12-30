@@ -33,50 +33,52 @@ import ProfilePage from "./Component/Panels/Staff/StaffPages/StaffMobileLayout/P
 import StaffInventory from "./Component/Panels/Staff/StaffPages/Inventory"; // Adjust path as needed
 import InvoiceDownload from "./Component/Panels/Staff/StaffPages/InvoiceDownload/InvoiceDownload";
 import PendingInvoices from "./Component/Panels/Staff/StaffPages/PendingInvoices/PendingInvoices";
-
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public */}
-        <Route path="/" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/staffdashboard" element={<StaffDashboard />} />
+    <GoogleOAuthProvider clientId="77643630750-2f13qfdip7lv5npp634cfu70h0ig7vle.apps.googleusercontent.com">
+      <Router>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/staffdashboard" element={<StaffDashboard />} />
 
-        <Route path="/staff/inventory" element={<StaffInventory />} />
+          <Route path="/staff/inventory" element={<StaffInventory />} />
 
-        {/* Staff Mobile Pages */}
-        <Route path="/staff/retailers" element={<MyRetailers />} />
-        <Route path="/staff/view-retailers/:id" element={<ViewDetails />} />
-        <Route path="/staff/profile" element={<ProfilePage />} />
-        <Route path="/staff/add-retailer" element={<AddRetailer mode="add" />} />
-        <Route path="/staff/edit-retailer/:id" element={<AddRetailer mode="edit" />} />
-        <Route path="/staff/view-retailer/:id" element={<AddRetailer mode="view" />} />
-        <Route path="/staff/sales-visits" element={<SalesVisits />} />
-        <Route path="/staff/log-visit" element={<LogVisit />} />
-        <Route path="/staff/expences" element={<StaffExpenses />} />
-        <Route path="/staff/add-expense" element={<AddExpense />} />
-        <Route path="/staff/offers" element={<StaffOffers />} />
-        <Route path="/staff/place-sales-order" element={<PlaceSalesOrder />} />
-        <Route path="/staff/cart" element={<Cart />} />
-        <Route path="/staff/checkout" element={<CheckoutPage />} />
-        <Route path="/staff/order-success" element={<OrderSuccess />} />
-        <Route path="/staff/orders" element={<StaffOrders />} />
-        <Route path="/staff_expensive" element={<Staff_expensive />} />
-        <Route path="/staff_add_expensive" element={<Staff_Add_expensive />} />
-        <Route path="/staff/invoices" element={<InvoiceDownload />} />
-<Route path="/staff/pending-invoices" element={<PendingInvoices />} />
-        <Route
-          path="/staff/order-details/:orderNumber"
-          element={<OrderFullDetails />}
-        />
+          {/* Staff Mobile Pages */}
+          <Route path="/staff/retailers" element={<MyRetailers />} />
+          <Route path="/staff/view-retailers/:id" element={<ViewDetails />} />
+          <Route path="/staff/profile" element={<ProfilePage />} />
+          <Route path="/staff/add-retailer" element={<AddRetailer mode="add" />} />
+          <Route path="/staff/edit-retailer/:id" element={<AddRetailer mode="edit" />} />
+          <Route path="/staff/view-retailer/:id" element={<AddRetailer mode="view" />} />
+          <Route path="/staff/sales-visits" element={<SalesVisits />} />
+          <Route path="/staff/log-visit" element={<LogVisit />} />
+          <Route path="/staff/expences" element={<StaffExpenses />} />
+          <Route path="/staff/add-expense" element={<AddExpense />} />
+          <Route path="/staff/offers" element={<StaffOffers />} />
+          <Route path="/staff/place-sales-order" element={<PlaceSalesOrder />} />
+          <Route path="/staff/cart" element={<Cart />} />
+          <Route path="/staff/checkout" element={<CheckoutPage />} />
+          <Route path="/staff/order-success" element={<OrderSuccess />} />
+          <Route path="/staff/orders" element={<StaffOrders />} />
+          <Route path="/staff_expensive" element={<Staff_expensive />} />
+          <Route path="/staff_add_expensive" element={<Staff_Add_expensive />} />
+          <Route path="/staff/invoices" element={<InvoiceDownload />} />
+          <Route path="/staff/pending-invoices" element={<PendingInvoices />} />
+          <Route
+            path="/staff/order-details/:orderNumber"
+            element={<OrderFullDetails />}
+          />
 
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 
