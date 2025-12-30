@@ -123,6 +123,7 @@ const handlePlaceOrder = async () => {
   let staffIncentive = 0;
   let assignedStaffName = "Unknown Staff";
   let staffEmail = null;
+  let staffMobile = null;
 
   try {
     const staffRes = await fetch(`${baseurl}/accounts/${actualStaffId}`);
