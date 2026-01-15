@@ -564,15 +564,19 @@ function MyRetailers() {
         return res.json();
       })
       .then((result) => {
+        console.log("API Response:", result);
+        
         if (result.success) {
-          setRetailers(result.data);
+          const retailersData = result.data || result.retailers || result.accounts || [];
+          console.log("Retailers data to set:", retailersData);
+          setRetailers(retailersData);
         } else {
-          throw new Error(result.error || "Failed to fetch retailers");
+          throw new Error(result.error || result.message || "Failed to fetch retailers");
         }
       })
       .catch((err) => {
         console.error("Error fetching retailers:", err);
-        setError("Failed to load retailers");
+        setError("Failed to load retailers: " + err.message);
       })
       .finally(() => {
         setLoading(false);
@@ -625,7 +629,6 @@ function MyRetailers() {
 
       if (response.ok) {
         alert("Retailer deleted successfully!");
-        // Refresh the retailers list
         fetchRetailers();
       } else {
         alert(result.error || "Failed to delete retailer");
@@ -638,12 +641,14 @@ function MyRetailers() {
     }
   };
 
-  const handlePlaceOrder = (retailerId, discount, retailerName ,retailermail) => {
+  // FIXED: Pass retailerDiscount instead of discount
+  const handlePlaceOrder = (retailerId, discount, retailerName, retailermail) => {
+    console.log("Placing order with retailer discount:", discount); // Debug log
     navigate("/staff/place-sales-order", { 
       state: { 
         retailerId, 
-        discount,
-        customerName: retailerName ,
+        retailerDiscount: parseFloat(discount) || 0, // Changed from discount to retailerDiscount
+        customerName: retailerName,
         retailermail
       } 
     });
@@ -712,6 +717,12 @@ function MyRetailers() {
                     <div className="my-retailer-header-text">
                       <h3>{retailer.name}</h3>
                       <div className="my-retailer-business">{retailer.business_name || "—"}</div>
+                      {/* Display discount badge */}
+                      {retailer.discount > 0 && (
+                        <div className="discount-badge">
+                          {retailer.discount}% Discount
+                        </div>
+                      )}
                     </div>
                     <div className="my-retailer-action-icons">
                       <button 
@@ -741,25 +752,16 @@ function MyRetailers() {
                   <div className="my-retailer-email">
                     <span className="my-retailer-contact-icon">✉️</span> {retailer.email || "No email"}
                   </div>
-                 <div className="my-retailer-email">
-  <span className="my-retailer-contact-icon">📍</span> {retailer.shipping_city || "No location"}
-</div>
-
-                </div>
-
-                {/* Business Details */}
-                {/* <div className="my-retailer-details">
-                  <div className="my-retailer-detail-row">
-                    <span className="my-retailer-detail-label">Location:</span>
-                    <span className="my-retailer-detail-value">{retailer.shipping_city || "—"}</span>
+                  <div className="my-retailer-email">
+                    <span className="my-retailer-contact-icon">📍</span> {retailer.shipping_city || "No location"}
                   </div>
-                </div> */}
+                </div>
 
                 {/* Button Row - Both buttons in same row */}
                 <div className="my-retailer-actions">
                   <button 
                     className="my-retailer-order-btn"
-                    onClick={() => handlePlaceOrder(retailer.id, retailer.discount, retailer.name , retailer.email)}
+                    onClick={() => handlePlaceOrder(retailer.id, retailer.discount, retailer.name, retailer.email)}
                   >
                     <span className="my-retailer-btn-icon">🛒</span> Place Order
                   </button>
