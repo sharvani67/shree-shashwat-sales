@@ -17,16 +17,20 @@ function PlaceSalesOrder() {
   const [categoriesList, setCategoriesList] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-
-  // Get retailer ID and discount from navigation state
+  
+  // FIXED: Get retailerDiscount from location state (not discount)
   const retailerId = location.state?.retailerId;
-  const retailerDiscount = location.state?.discount || 0;
+  const retailerDiscount = parseFloat(location.state?.retailerDiscount) || 0; // Changed from discount to retailerDiscount
   const customerName = location.state?.customerName || "";
+  const retailermail = location.state?.retailermail || "";
 
   // Get logged-in user
   const storedData = localStorage.getItem("user");
   const user = storedData ? JSON.parse(storedData) : null;
   const staffId = user?.id || null;
+
+  console.log("Staff PlaceSalesOrder - Retailer Discount received:", retailerDiscount);
+  console.log("Staff PlaceSalesOrder - Location state:", location.state);
 
   // Fetch categories
   useEffect(() => {
@@ -82,7 +86,7 @@ function PlaceSalesOrder() {
     return iconMap[categoryName] || '📦'; // Default icon
   };
 
-  // Fetch cart items on load (just to get count)
+  // Fetch cart items on load
   useEffect(() => {
     if (!retailerId) return;
 
@@ -121,22 +125,41 @@ function PlaceSalesOrder() {
         if (result.success && Array.isArray(result.data)) {
           const retailer = result.data.find(r => r.id === parseInt(retailerId));
           if (retailer) {
+            // Use retailerDiscount from props first, otherwise use from API
+            const discountToUse = retailerDiscount > 0 ? retailerDiscount : (parseFloat(retailer.discount) || 0);
             setRetailerInfo({
               name: retailer.name,
               business: retailer.business_name,
-              location: retailer.shipping_city
+              location: retailer.shipping_city,
+              email: retailermail || retailer.email,
+              discount: discountToUse,
             });
+            console.log("Staff PlaceSalesOrder - Set retailerInfo discount to:", discountToUse);
           }
         }
       } catch (err) {
         console.error("Error fetching retailer info:", err);
+        // Fallback to state data
+        setRetailerInfo({
+          name: customerName,
+          email: retailermail,
+          discount: retailerDiscount,
+        });
+        console.log("Staff PlaceSalesOrder - Fallback retailerInfo discount:", retailerDiscount);
       }
     };
 
     if (staffId) {
       fetchRetailerInfo();
+    } else {
+      // Fallback to state data
+      setRetailerInfo({
+        name: customerName,
+        email: retailermail,
+        discount: retailerDiscount,
+      });
     }
-  }, [retailerId, staffId]);
+  }, [retailerId, staffId, customerName, retailerDiscount, retailermail]);
 
   // Fetch sales products
   useEffect(() => {
@@ -173,15 +196,12 @@ function PlaceSalesOrder() {
 
   // Filter products based on search AND category
   const filteredProducts = products.filter(product => {
-    // Filter by category
     const matchesCategory = selectedCategory === 'all' || 
       (product.category_id && product.category_id.toString() === selectedCategory) ||
       (product.category && product.category.toLowerCase() === categoriesList.find(cat => cat.id === selectedCategory)?.name?.toLowerCase());
     
-    // If no search term, only filter by category
     if (!searchTerm.trim()) return matchesCategory;
     
-    // Filter by search term
     const query = searchTerm.toLowerCase().trim();
     const matchesSearch = 
       product.name?.toLowerCase().includes(query) ||
@@ -191,73 +211,72 @@ function PlaceSalesOrder() {
     return matchesCategory && matchesSearch;
   });
 
-
-// Add product to cart via backend
-const addToCart = async (product) => {
-  try {
-    // First check if product is already in cart
-    const existingItem = cart.find(item => item.product_id === product.id);
-    
-    // Get logged-in user info
-    const storedData = localStorage.getItem("user");
-    const user = storedData ? JSON.parse(storedData) : null;
-    
-    // Format price to ensure it's a number
-    const productPrice = parseFloat(product.price) || 0;
-    
-    if (existingItem) {
-      // Update quantity
-      const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${existingItem.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          quantity: existingItem.quantity + 1 
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update quantity");
-    } else {
-      // Add new item with price
-      const requestBody = {
-        customer_id: retailerId,
-        product_id: product.id,
-        quantity: 1,
-        price: productPrice,  // Add the product price here
-        credit_period: 0, // Default no credit period
-        credit_percentage: 0 // Default no credit percentage
-      };
+  // Add product to cart via backend
+  const addToCart = async (product) => {
+    try {
+      // First check if product is already in cart
+      const existingItem = cart.find(item => item.product_id === product.id);
       
-      // Add staff_id if the user is a staff member
-      if (user?.role === 'staff') {
-        requestBody.staff_id = user.id;
-      }
+      // Get logged-in user info
+      const storedData = localStorage.getItem("user");
+      const user = storedData ? JSON.parse(storedData) : null;
       
-      const response = await fetch(`${baseurl}/api/cart/add-to-cart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // Format price to ensure it's a number
+      const productPrice = parseFloat(product.price) || 0;
+      
+      if (existingItem) {
+        // Update quantity
+        const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${existingItem.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            quantity: existingItem.quantity + 1 
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add to cart");
+        if (!response.ok) throw new Error("Failed to update quantity");
+      } else {
+        // Add new item with price
+        const requestBody = {
+          customer_id: retailerId,
+          product_id: product.id,
+          quantity: 1,
+          price: productPrice,  // Add the product price here
+          credit_period: 0, // Default no credit period
+          credit_percentage: 0 // Default no credit percentage
+        };
+        
+        // Add staff_id if the user is a staff member
+        if (user?.role === 'staff') {
+          requestBody.staff_id = user.id;
+        }
+        
+        const response = await fetch(`${baseurl}/api/cart/add-to-cart`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to add to cart");
+        }
       }
+
+      // Refresh cart from backend
+      const cartResponse = await fetch(`${baseurl}/api/cart/customer-cart/${retailerId}`);
+      const refreshedCart = await cartResponse.json();
+      setCart(refreshedCart || []);
+
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      alert(err.message || "Failed to add item to cart");
     }
-
-    // Refresh cart from backend
-    const cartResponse = await fetch(`${baseurl}/api/cart/customer-cart/${retailerId}`);
-    const refreshedCart = await cartResponse.json();
-    setCart(refreshedCart || []);
-
-  } catch (err) {
-    console.error("Error adding to cart:", err);
-    alert(err.message || "Failed to add item to cart");
-  }
-};
+  };
 
   // Cart count
   const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -298,7 +317,12 @@ const addToCart = async (product) => {
               <div className="staff-header-text">
                 <h1>Place Sales Order</h1>
                 {retailerInfo.name && (
-                  <p className="staff-retailer-name">For: {retailerInfo.name}</p>
+                  <div>
+                    <p className="staff-retailer-name">For: {retailerInfo.name}</p>
+                    {retailerInfo.discount > 0 && (
+                      <p className="staff-retailer-discount">Retailer Discount: {retailerInfo.discount}%</p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -308,8 +332,9 @@ const addToCart = async (product) => {
               to="/staff/cart" 
               state={{ 
                 retailerId, 
-                discount: retailerDiscount,
-                customerName: retailerInfo.name || customerName
+                retailerDiscount: retailerDiscount, // Pass retailerDiscount here
+                customerName: retailerInfo.name || customerName,
+                retailermail: retailerInfo.email || retailermail
               }}
               className="staff-cart-btn"
             >
@@ -321,7 +346,7 @@ const addToCart = async (product) => {
           </div>
         </div>
 
-        {/* Category Slider - ADDED ABOVE SEARCH */}
+        {/* Category Slider */}
         <div className="category-slider-container">
           <div className="category-slider">
             <button
