@@ -60,6 +60,8 @@ function AddRetailer({ mode = "add" }) {
     shipping_address_line2: "",
     shipping_city: "",
     shipping_pin_code: "",
+     shipping_state_code: "",  // Add this
+  billing_state_code: "",   // Add this
     shipping_state: "",
     shipping_country: "",
     shipping_branch_name: "",
@@ -232,6 +234,10 @@ function AddRetailer({ mode = "add" }) {
             shipping_city: result.ctj || "",
             shipping_pin_code: addr.pncd || "",
             shipping_state: addr.stcd || "",
+              shipping_state: addr.stcd || "", // State code from API
+  shipping_state_code: addr.stcd || "", // Set state code
+  billing_state: addr.stcd || "", // State code from API
+  billing_state_code: addr.stcd || "", // Set state code
             shipping_country: "India",
             billing_address_line1: addressLine1,
             billing_address_line2: addressLine2,
@@ -343,15 +349,84 @@ function AddRetailer({ mode = "add" }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+const handleInputChange = (e) => {
+  if (mode === "view") return;
+  const { name, value } = e.target;
 
-  const handleInputChange = (e) => {
-    if (mode === "view") return;
-    const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+  // Base update
+  setFormData(prev => {
+    let updated = { ...prev, [name]: value };
+
+    // When user selects a shipping state by name, set its code
+    if (name === 'shipping_state') {
+      const st = getStateByName(value);
+      // Note: Add shipping_state_code to your formData state if not already there
+      updated.shipping_state_code = st ? st.code : "";
     }
-  };
+
+    // When user selects a billing state by name, set its code
+    if (name === 'billing_state') {
+      const st = getStateByName(value);
+      // Note: Add billing_state_code to your formData state if not already there
+      updated.billing_state_code = st ? st.code : "";
+    }
+
+    return updated;
+  });
+
+  if (errors[name]) {
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  }
+};
+
+  // Master list of Indian States & UTs with official GST-style codes
+ const STATES = [
+  { code: "01", name: "Jammu & Kashmir" },
+  { code: "02", name: "Himachal Pradesh" },
+  { code: "03", name: "Punjab" },
+  { code: "04", name: "Chandigarh" },
+  { code: "05", name: "Uttarakhand" },
+  { code: "06", name: "Haryana" },
+  { code: "07", name: "Delhi" },
+  { code: "08", name: "Rajasthan" },
+  { code: "09", name: "Uttar Pradesh" },
+  { code: "10", name: "Bihar" },
+  { code: "11", name: "Sikkim" },
+  { code: "12", name: "Arunachal Pradesh" },
+  { code: "13", name: "Nagaland" },
+  { code: "14", name: "Manipur" },
+  { code: "15", name: "Mizoram" },
+  { code: "16", name: "Tripura" },
+  { code: "17", name: "Meghalaya" },
+  { code: "18", name: "Assam" },
+  { code: "19", name: "West Bengal" },
+  { code: "20", name: "Jharkhand" },
+  { code: "21", name: "Odisha" },
+  { code: "22", name: "Chhattisgarh" },
+  { code: "23", name: "Madhya Pradesh" },
+  { code: "24", name: "Gujarat" },
+  { code: "25", name: "Daman & Diu" },
+  { code: "26", name: "Dadra & Nagar Haveli" },
+  { code: "27", name: "Maharashtra" },
+  { code: "28", name: "Andhra Pradesh" },
+  { code: "29", name: "Karnataka" },
+  { code: "30", name: "Goa" },
+  { code: "31", name: "Lakshadweep" },
+  { code: "32", name: "Kerala" },
+  { code: "33", name: "Tamil Nadu" },
+  { code: "34", name: "Puducherry" },
+  { code: "35", name: "Andaman & Nicobar Islands" },
+  { code: "36", name: "Telangana" },
+  { code: "37", name: "Andhra Pradesh (New)" }
+];
+
+
+const getStateByName = (name) =>
+  STATES.find(s => s.name === name);
+
+const getStateByCode = (code) =>
+  STATES.find(s => s.code === code);
+
 
   const handleNext = () => {
     if (!validateCurrentTab()) {
@@ -749,123 +824,140 @@ function AddRetailer({ mode = "add" }) {
             </div>
           </div>
         );
-      case "shipping":
-        return (
-          <div className="form-section">
-            <h2 className="section-title">Shipping Address</h2>
-            {renderField({ name: "shipping_address_line1", label: "Address Line 1", required: false })}
-            {renderField({ name: "shipping_address_line2", label: "Address Line 2", required: false })}
-            {renderField({ name: "shipping_city", label: "City", required: false })}
-            {renderField({ name: "shipping_pin_code", label: "Pin Code", required: false })}
-            {renderField({
-              type: "select",
-              name: "shipping_state",
-              label: "State",
-              required: true,
-              options: [
-                { value: "Telangana", label: "Telangana" },
-                { value: "Andhra Pradesh", label: "Andhra Pradesh" },
-                { value: "Kerala", label: "Kerala" },
-                { value: "Karnataka", label: "Karnataka" },
-              ],
-            })}
-            {renderField({
-              type: "select",
-              name: "shipping_country",
-              label: "Country",
-              required: true,
-              options: [
-                { value: "India", label: "India" },
-                { value: "Bangladesh", label: "Bangladesh" },
-                { value: "Canada", label: "Canada" },
-                { value: "Iraq", label: "Iraq" },
-              ],
-            })}
-            {renderField({ name: "shipping_branch_name", label: "Branch Name", required: false })}
-            {renderField({ name: "shipping_gstin", label: "GSTIN", required: false })}
-            <div className="form-buttons">
-              <div className="mobile-button-row">
-                <button type="button" className="cancel-btn" onClick={handleBack}>
-                  Back
-                </button>
-                <button type="button" className="submit-btn bank-button" onClick={handleNext}>
-                  Next: Billing Address
-                </button>
-              </div>
-            </div>
-          </div>
-        );
+     case "shipping":
+  return (
+    <div className="form-section">
+      <h2 className="section-title">Shipping Address</h2>
+      {renderField({ name: "shipping_address_line1", label: "Address Line 1", required: false })}
+      {renderField({ name: "shipping_address_line2", label: "Address Line 2", required: false })}
+      {renderField({ name: "shipping_city", label: "City", required: false })}
+      {renderField({ name: "shipping_pin_code", label: "Pin Code", required: false })}
+      
+      <div className="row">
+        <div className="col-md-6">
+          {renderField({
+            type: "select",
+            name: "shipping_state",
+            label: "State",
+            required: true,
+            options: STATES.map(s => ({ value: s.name, label: s.name }))
+          })}
+        </div>
+        <div className="col-md-6">
+          {renderField({
+            type: "select",
+            name: "shipping_state_code",
+            label: "State Code",
+            required: true,
+            options: STATES.map(s => ({ value: s.code, label: s.code }))
+          })}
+        </div>
+      </div>
+      
+      {renderField({
+        type: "select",
+        name: "shipping_country",
+        label: "Country",
+        required: true,
+        options: [
+          { value: "India", label: "India" },
+          { value: "Bangladesh", label: "Bangladesh" },
+          { value: "Canada", label: "Canada" },
+          { value: "Iraq", label: "Iraq" },
+        ],
+      })}
+      {renderField({ name: "shipping_branch_name", label: "Branch Name", required: false })}
+      {renderField({ name: "shipping_gstin", label: "GSTIN", required: false })}
+      
+      <div className="form-buttons">
+        <div className="mobile-button-row">
+          <button type="button" className="cancel-btn" onClick={handleBack}>
+            Back
+          </button>
+          <button type="button" className="submit-btn bank-button" onClick={handleNext}>
+            Next: Billing Address
+          </button>
+        </div>
+      </div>
+    </div>
+  );
       case "billing":
-        return (
-          <div className="form-section">
-            <h2 className="section-title">Billing Address</h2>
-            {mode !== "view" && (
-              <div className="form-group">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="sameAsShipping"
-                    checked={sameAsShipping}
-                    onChange={(e) => setSameAsShipping(e.target.checked)}
-                  />
-                  <label className="form-check-label" htmlFor="sameAsShipping">
-                    Shipping address is same as billing address
-                  </label>
-                </div>
-              </div>
-            )}
-            {(!sameAsShipping || mode === "view") && (
-              <>
-                {renderField({ name: "billing_address_line1", label: "Address Line 1", required: false })}
-                {renderField({ name: "billing_address_line2", label: "Address Line 2", required: false })}
-                {renderField({ name: "billing_city", label: "City", required: false })}
-                {renderField({ name: "billing_pin_code", label: "Pin Code", required: false })}
-                {renderField({
-                  type: "select",
-                  name: "billing_state",
-                  label: "State",
-                  required: true,
-                  options: [
-                    { value: "Telangana", label: "Telangana" },
-                    { value: "Andhra Pradesh", label: "Andhra Pradesh" },
-                    { value: "Kerala", label: "Kerala" },
-                    { value: "Karnataka", label: "Karnataka" },
-                  ],
-                })}
-                {renderField({
-                  type: "select",
-                  name: "billing_country",
-                  label: "Country",
-                  required: true,
-                  options: [
-                    { value: "India", label: "India" },
-                    { value: "Bangladesh", label: "Bangladesh" },
-                    { value: "Canada", label: "Canada" },
-                    { value: "Iraq", label: "Iraq" },
-                  ],
-                })}
-                {renderField({ name: "billing_branch_name", label: "Branch Name", required: false })}
-                {renderField({ name: "billing_gstin", label: "GSTIN", required: false })}
-              </>
-            )}
-            {mode === "view" && sameAsShipping && (
-              <div className="alert alert-info">
-                <strong>Note:</strong> Billing address is same as shipping address.
-              </div>
-            )}
-            <div className="form-buttons">
-              <div className="mobile-button-row">
-                <button type="button" className="cancel-btn" onClick={handleBack}>
-                  Back
-                </button>
-                <button type="submit" className="submit-btn bank-button">
-                  {mode === "edit" ? "Update Retailer" : "Add Retailer"}
-                </button>
-              </div>
+  return (
+    <div className="form-section">
+      <h2 className="section-title">Billing Address</h2>
+      {mode !== "view" && (
+        <div className="form-group">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="sameAsShipping"
+              checked={sameAsShipping}
+              onChange={(e) => setSameAsShipping(e.target.checked)}
+            />
+            <label className="form-check-label" htmlFor="sameAsShipping">
+              Shipping address is same as billing address
+            </label>
+          </div>
+        </div>
+      )}
+      {(!sameAsShipping || mode === "view") && (
+        <>
+          {renderField({ name: "billing_address_line1", label: "Address Line 1", required: false })}
+          {renderField({ name: "billing_address_line2", label: "Address Line 2", required: false })}
+          {renderField({ name: "billing_city", label: "City", required: false })}
+          {renderField({ name: "billing_pin_code", label: "Pin Code", required: false })}
+          
+          <div className="row">
+            <div className="col-md-6">
+              {renderField({
+                type: "select",
+                name: "billing_state",
+                label: "State",
+                required: true,
+                options: STATES.map(s => ({ value: s.name, label: s.name }))
+              })}
+            </div>
+            <div className="col-md-6">
+              {renderField({
+                type: "select",
+                name: "billing_state_code",
+                label: "State Code",
+                required: true,
+                options: STATES.map(s => ({ value: s.code, label: s.code }))
+              })}
             </div>
           </div>
-        );
+          
+          {renderField({
+            type: "select",
+            name: "billing_country",
+            label: "Country",
+            required: true,
+            options: [
+              { value: "India", label: "India" },
+              { value: "Bangladesh", label: "Bangladesh" },
+              { value: "Canada", label: "Canada" },
+              { value: "Iraq", label: "Iraq" },
+            ],
+          })}
+          {renderField({ name: "billing_branch_name", label: "Branch Name", required: false })}
+          {renderField({ name: "billing_gstin", label: "GSTIN", required: false })}
+        </>
+      )}
+      
+      <div className="form-buttons">
+        <div className="mobile-button-row">
+          <button type="button" className="cancel-btn" onClick={handleBack}>
+            Back
+          </button>
+          <button type="submit" className="submit-btn bank-button">
+            {mode === "edit" ? "Update Retailer" : "Add Retailer"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
       default:
         return null;
     }

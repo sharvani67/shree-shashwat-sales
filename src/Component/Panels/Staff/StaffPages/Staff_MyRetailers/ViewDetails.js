@@ -259,6 +259,10 @@ function ViewRetailerDetails() {
                 <span className="view-details-address-label">State</span>
                 <span className="view-details-address-value">{retailer.shipping_state || "—"}</span>
               </div>
+                 <div className="view-details-address-row">
+                <span className="view-details-address-label">State Code</span>
+                <span className="view-details-address-value">{retailer.shipping_state_code || "—"}</span>
+              </div>
               <div className="view-details-address-row">
                 <span className="view-details-address-label">PIN Code</span>
                 <span className="view-details-address-value">{retailer.shipping_pin_code || "—"}</span>
@@ -298,6 +302,7 @@ function ViewRetailerDetails() {
                 <span className="view-details-address-label">State</span>
                 <span className="view-details-address-value">{retailer.billing_state || "—"}</span>
               </div>
+              
               <div className="view-details-address-row">
                 <span className="view-details-address-label">PIN Code</span>
                 <span className="view-details-address-value">{retailer.billing_pin_code || "—"}</span>
