@@ -312,8 +312,8 @@ function Checkout() {
               </div>
             </div>
             <div className="action-buttons">
-              <button onClick={() => navigate("/staff/dashboard")} className="home-btn">
-                Go to Dashboard
+              <button onClick={() => navigate("/staff/orders")} className="home-btn">
+                Go to Orders
               </button>
             </div>
           </div>
