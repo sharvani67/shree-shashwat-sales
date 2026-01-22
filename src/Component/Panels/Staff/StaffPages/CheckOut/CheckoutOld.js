@@ -21,11 +21,8 @@ function Checkout() {
     userRole,
     totals: initialTotals,
     orderTotals: initialOrderTotals,
-    userDiscountPercentage,
-    mobileNumber // Add mobileNumber from location state
+    userDiscountPercentage
   } = location.state || {};
-
-  console.log("Checkout - Mobile Number received:", mobileNumber); // Log the mobile number
 
   const discountPercentage = discount || userDiscountPercentage || 0;
 
@@ -38,7 +35,6 @@ function Checkout() {
         if (res.ok) {
           const data = await res.json();
           console.log("Retailer Details:", data);
-          console.log("Retailer Mobile Number:", data.mobile_number); // Log mobile number from backend
           setRetailerDetails(data);
         } else {
           console.warn("Failed to fetch retailer details");
@@ -160,8 +156,6 @@ function Checkout() {
         order_number: orderNumber,
         customer_id: retailerId,
         customer_name: customerName || retailerDetails?.name || "Customer",
-        // Add retailer_mobile field - using mobileNumber from props or retailerDetails
-        retailer_mobile: mobileNumber || retailerDetails?.mobile_number || "",
         order_total: orderTotals.totalCustomerSalePrice,
         discount_amount: orderTotals.totalDiscount,
         taxable_amount: orderTotals.totalTaxableAmount,
@@ -180,8 +174,7 @@ function Checkout() {
         staff_email: staffEmail,
         staff_mobile: staffMobile,
         retailer_email: retailerDetails?.email || retailermail,
-        // Also include retailer_mobile here for backward compatibility if needed
-        retailer_mobile: mobileNumber || retailerDetails?.mobile_number || "",
+        retailer_mobile: retailerDetails?.mobile_number,
       },
       orderItems: cartItems.map(item => {
         const breakdown = item.breakdown?.perUnit || {};
@@ -269,8 +262,7 @@ function Checkout() {
         staffId: initialStaffId,
         userRole,
         orderTotals,
-        userDiscountPercentage: discountPercentage,
-        mobileNumber // Also pass mobileNumber back to cart if needed
+        userDiscountPercentage: discountPercentage
       }
     });
   };
@@ -336,9 +328,6 @@ function Checkout() {
           <h1>Checkout</h1>
           <div className="customer-info">
             Customer: <strong>{customerName || "N/A"}</strong>
-            {mobileNumber && (
-              <span className="customer-mobile"> | Mobile: {mobileNumber}</span>
-            )}
           </div>
         </div>
 
