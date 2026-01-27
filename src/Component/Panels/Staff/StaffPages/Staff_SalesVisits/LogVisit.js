@@ -11,8 +11,9 @@ function LogVisit() {
   const [loadingRetailers, setLoadingRetailers] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  // Get logged-in user from localStorage
+const [locationLoading, setLocationLoading] = useState(false);
+const [imagePreview, setImagePreview] = useState(null);
+const [imageFile, setImageFile] = useState(null);
   const storedData = localStorage.getItem("user");
   const user = storedData ? JSON.parse(storedData) : null;
   const userId = user ? user.id : null;
@@ -28,6 +29,8 @@ function LogVisit() {
     salesAmount: "",
     transactionType: "",
     description: "",
+      location: "",
+  image: null,  
   });
 
   // Fetch retailers (only for dropdown)
@@ -81,46 +84,169 @@ function LogVisit() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    const payload = {
-      retailer_id: formData.retailer_id,
-      retailer_name: formData.retailer_name,
-      staff_id: userId,     // from localStorage only
-      staff_name: userName, // from localStorage only
-      visit_type: formData.visitType,
-      visit_outcome: formData.visitOutcome,
-      sales_amount: formData.salesAmount
-        ? Number(String(formData.salesAmount).replace(/[^0-9.-]+/g, ""))
-        : null,
-      transaction_type: formData.transactionType || null,
-      description: formData.description || null,
-    };
+const getCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser");
+    return;
+  }
 
-    try {
-      const res = await fetch(`${baseurl}/api/salesvisits`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setShowSuccess(true);
-        setTimeout(() => {
-          setShowSuccess(false);
-          navigate("/staff/sales-visits");
-        }, 1500);
+  setLocationLoading(true);
+  
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      try {
+        const { latitude, longitude } = position.coords;
+        
+        // Call your backend endpoint instead of direct OpenStreetMap
+        const response = await fetch(
+          `${baseurl}/api/reverse-geocode?lat=${latitude}&lon=${longitude}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.address) {
+          setFormData(prev => ({
+            ...prev,
+            location: data.address
+          }));
+        } else {
+          // Fallback to coordinates
+          setFormData(prev => ({
+            ...prev,
+            location: `Latitude: ${latitude.toFixed(6)}, Longitude: ${longitude.toFixed(6)}`
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        // Alternative: Use a simpler method without external API
+        const { latitude, longitude } = position.coords;
+        setFormData(prev => ({
+          ...prev,
+          location: `Coordinates: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        }));
+      } finally {
+        setLocationLoading(false);
       }
-      else {
-        console.error("Failed to save visit:", data);
-        alert(`Failed to save visit: ${data.error || "Unknown error"}`);
+    },
+    (error) => {
+      console.error("Geolocation error:", error);
+      setLocationLoading(false);
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          alert("Location access denied. Please enable location services.");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          alert("Location information unavailable.");
+          break;
+        case error.TIMEOUT:
+          alert("Location request timed out.");
+          break;
+        default:
+          alert("An unknown error occurred while getting location.");
+          break;
       }
-    } catch (err) {
-      console.error("Error saving visit:", err);
-      alert("Server error while saving visit");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
     }
-  };
+  );
+};
+
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    // Validate file type
+    if (!file.type.match('image.*')) {
+      alert("Please select an image file (JPG, PNG, GIF)");
+      return;
+    }
+        if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+    
+    setImageFile(file);
+    setFormData(prev => ({
+      ...prev,
+      image: file
+    }));
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+const removeImage = () => {
+  setImagePreview(null);
+  setImageFile(null);
+  setFormData(prev => ({
+    ...prev,
+    image: null
+  }));
+  const fileInput = document.getElementById("imageUpload");
+  if (fileInput) {
+    fileInput.value = "";
+  }
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Create FormData to handle file upload
+  const formDataToSend = new FormData();
+  
+  // Append all form data
+  formDataToSend.append('retailer_id', formData.retailer_id);
+  formDataToSend.append('retailer_name', formData.retailer_name);
+  formDataToSend.append('staff_id', userId);
+  formDataToSend.append('staff_name', userName);
+  formDataToSend.append('visit_type', formData.visitType);
+  formDataToSend.append('visit_outcome', formData.visitOutcome);
+  formDataToSend.append('sales_amount', formData.salesAmount 
+    ? Number(String(formData.salesAmount).replace(/[^0-9.-]+/g, ""))
+    : '');
+  formDataToSend.append('transaction_type', formData.transactionType || '');
+  formDataToSend.append('description', formData.description || '');
+  formDataToSend.append('location', formData.location || '');
+  
+  if (formData.image) {
+    formDataToSend.append('image', formData.image);
+  }
+
+  try {
+    const res = await fetch(`${baseurl}/api/salesvisits`, {
+      method: "POST",
+      body: formDataToSend,
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigate("/staff/sales-visits");
+      }, 1500);
+    }
+    else {
+      console.error("Failed to save visit:", data);
+      alert(`Failed to save visit: ${data.error || "Unknown error"}`);
+    }
+  } catch (err) {
+    console.error("Error saving visit:", err);
+    alert("Server error while saving visit");
+  }
+};
 
   const handleCancel = () => {
     navigate("/staff/sales-visits");
@@ -252,6 +378,97 @@ function LogVisit() {
               rows="4"
             />
           </div>
+
+          {/* Location Field */}
+<div className="form-group">
+  <label htmlFor="location">Location</label>
+
+  <div className="location-input-wrapper">
+    <textarea
+      id="location"
+      name="location"
+      value={formData.location}
+      onChange={handleInputChange}
+      placeholder="Your current location will appear here"
+      rows="3"
+      className="location-input"
+    />
+
+    <button
+      type="button"
+      className="location-icon-btn"
+      onClick={getCurrentLocation}
+      disabled={locationLoading}
+      title="Get current location"
+    >
+      {locationLoading ? (
+        <span className="location-spinner"></span>
+      ) : (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+          <circle cx="12" cy="12" r="8" />
+        </svg>
+      )}
+    </button>
+  </div>
+
+  <p className="location-hint">
+    Click the location icon to auto-detect your location
+  </p>
+</div>
+
+
+{/* Image Upload Field */}
+<div className="form-group">
+  <label htmlFor="imageUpload">Visit Photo (Optional)</label>
+  <div className="image-upload-container">
+    <input
+      type="file"
+      id="imageUpload"
+      accept="image/*"
+      onChange={handleImageChange}
+      className="image-input"
+      capture="environment"
+    />
+    <label htmlFor="imageUpload" className="upload-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      Choose or Take Photo
+    </label>
+  </div>
+  
+  {/* Image Preview */}
+  {imagePreview && (
+    <div className="image-preview-container">
+      <div className="image-preview">
+        <img src={imagePreview} alt="Preview" />
+        <button
+          type="button"
+          className="remove-image-btn"
+          onClick={removeImage}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Remove
+        </button>
+      </div>
+    </div>
+  )}
+  
+  <p className="image-hint">Max file size: 5MB. Supported formats: JPG, PNG, GIF</p>
+</div>
 
           {/* Buttons */}
           <div className="form-buttons">
