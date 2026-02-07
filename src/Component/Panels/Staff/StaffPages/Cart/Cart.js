@@ -153,7 +153,6 @@ function CartPage() {
         
         const result = await response.json();
         const products = Array.isArray(result) ? result : (result.data || []);
-        
         // Create a map of product details
         const productMap = {};
         products.forEach(product => {
@@ -166,6 +165,8 @@ function CartPage() {
             unit: product.unit,
             gst_rate: parseFloat(product.gst_rate) || 0,
             price: parseFloat(product.price) || 0, // This is sale_price
+              net_price: parseFloat(product.net_price) || 0, // Add net_price
+          weight: product.weight || null, // Add weight
             mrp: parseFloat(product.mrp) || 0,
             inclusive_gst: product.inclusive_gst || "Exclusive",
             category_id: categoryId,
@@ -634,7 +635,11 @@ function CartPage() {
         // Additional fields needed for checkout
         item_name: product.name || `Product ${item.product_id}`,
         product_details: product,
-        breakdown: breakdownObj
+        breakdown: breakdownObj,
+
+              net_price: product.net_price || 0,
+      weight: product.weight || null
+
       };
     });
 
