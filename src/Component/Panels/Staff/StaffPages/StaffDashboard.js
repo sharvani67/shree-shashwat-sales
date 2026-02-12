@@ -106,11 +106,7 @@ function StaffDashboard() {
   return (
     <StaffMobileLayout>
       <div className="staff-dashboard-mobile">
-        {/* Header Section */}
-        <header className="dashboard-header">
-          <h1>Good morning, {staffName} <span className="emoji"></span></h1>
-          <p>Here's your performance summary and today's tasks.</p>
-        </header>
+  
 
         <div className="dashboard-content">
           {loading && <div className="loading-spinner">Loading dashboard...</div>}
