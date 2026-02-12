@@ -29,7 +29,7 @@ function StaffDashboard() {
       
       try {
         // Fetch retailer count
-        const retailerResponse = await fetch(`${baseurl}/api/get-sales-retailers/${staffId}`);
+        const retailerResponse = await fetch(`${baseurl}/get-sales-retailers/${staffId}`);
         const retailerData = await retailerResponse.json();
         
         // Fetch sales visits for this week
