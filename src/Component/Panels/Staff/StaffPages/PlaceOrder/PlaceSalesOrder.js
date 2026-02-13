@@ -18,7 +18,6 @@ function PlaceSalesOrder() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   
-  // FIXED: Get retailerDiscount from location state (not discount)
   const retailerId = location.state?.retailerId;
   const retailerDiscount = parseFloat(location.state?.retailerDiscount) || 0; // Changed from discount to retailerDiscount
   const customerName = location.state?.customerName || "";

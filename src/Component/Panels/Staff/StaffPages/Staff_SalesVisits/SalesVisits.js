@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StaffMobileLayout from "../StaffMobileLayout/StaffMobileLayout";
 import { baseurl } from "./../../../../BaseURL/BaseURL";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaMapMarkerAlt, FaTimes, FaSpinner } from "react-icons/fa";
 import { MdImage } from "react-icons/md";
 import "./SalesVisits.css";
 
@@ -19,12 +19,53 @@ function SalesVisits() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+  
+  // Image Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState("");
+  const [modalImageAlt, setModalImageAlt] = useState("");
 
   // Get logged-in user
   const storedData = localStorage.getItem("user");
   const user = storedData ? JSON.parse(storedData) : null;
   const staffId = user?.id || null;
   const role = user?.role || null;
+
+  // Format date from YYYY-MM-DD to DD/MM/YYYY for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB");
+  };
+
+  // Format date from DD/MM/YYYY or ISO to YYYY-MM-DD for input
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    
+    // If it's already in YYYY-MM-DD format
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateString;
+    }
+    
+    // If it's in DD/MM/YYYY format
+    if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Try to parse as date
+    try {
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    } catch (e) {
+      console.error("Error parsing date:", e);
+    }
+    
+    return "";
+  };
 
   // Fetch Sales Visits
   useEffect(() => {
@@ -96,23 +137,40 @@ function SalesVisits() {
 
   const handleLogVisit = () => navigate("/staff/log-visit");
 
+  // Function to open image modal
+  const openImageModal = (imageUrl, retailerName) => {
+    setModalImageUrl(imageUrl);
+    setModalImageAlt(`Visit image for ${retailerName || 'retailer'}`);
+    setIsModalOpen(true);
+  };
+
+  // Function to close image modal
+  const closeImageModal = () => {
+    setIsModalOpen(false);
+    setModalImageUrl("");
+    setModalImageAlt("");
+  };
+
   const handleEditVisit = (visit) => {
     setEditingVisitId(visit.id);
     setEditFormData({
       retailer_id: visit.retailer_id,
       retailer_name: visit.retailer_name,
+      visit_date: visit.date, // ADDED: date field
       visit_outcome: visit.visit_outcome,
       sales_amount: visit.sales_amount,
       transaction_type: visit.transaction_type,
       visit_type: visit.visit_type,
       location: visit.location || "",
       description: visit.description || "",
+      image_filename: visit.image_filename || "",
     });
     // Set image preview if exists
     if (visit.image_url) {
       setImagePreview(visit.image_url);
     }
     setImageFile(null);
+    setIsImageRemoved(false);
   };
 
   // Function to get current location
@@ -211,30 +269,37 @@ function SalesVisits() {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+      
+      // Clear the remove flag when new image is selected
+      setEditFormData(prev => ({
+        ...prev,
+        image_filename: file.name
+      }));
+      setIsImageRemoved(false);
     }
   };
 
-  // Remove image
+  // Remove image - FIXED for DB removal
   const removeImage = () => {
     setImagePreview(null);
     setImageFile(null);
+    
+    // Set image_filename to empty string to indicate removal
     setEditFormData(prev => ({
       ...prev,
-      image_filename: ""
+      image_filename: "",
+      image_url: null
     }));
+    
+    // IMPORTANT: Set the flag that image is removed
+    setIsImageRemoved(true);
+    
     const fileInput = document.getElementById(`imageUpload-${editingVisitId}`);
     if (fileInput) {
       fileInput.value = "";
     }
-  };
-
-  // Function to view image in new tab
-  const handleViewImage = (imageUrl) => {
-    if (imageUrl) {
-      window.open(imageUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      window.alert("No image available for this visit");
-    }
+    
+    console.log("Image removed flag set to true");
   };
 
   // Function to view location on map
@@ -266,15 +331,21 @@ function SalesVisits() {
         formDataToSend.append('transaction_type', editFormData.transaction_type || '');
         formDataToSend.append('description', editFormData.description || '');
         formDataToSend.append('location', editFormData.location || '');
+        formDataToSend.append('date', editFormData.visit_date); // CHANGED: from created_at to date
         
         if (imageFile) {
           formDataToSend.append('image', imageFile);
+        }
+        
+        // Add flag to indicate if image should be removed
+        if (isImageRemoved || (editFormData.image_filename === "" && !imageFile && originalVisit?.image_url)) {
+          formDataToSend.append('remove_image', 'true');
+          formDataToSend.append('image_filename', '');
         }
 
         const res = await fetch(`${baseurl}/api/salesvisits/${visitId}`, {
           method: "PUT",
           body: formDataToSend,
-          // Don't set Content-Type header for FormData - browser will set it automatically
         });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -291,8 +362,10 @@ function SalesVisits() {
             transaction_type: editFormData.transaction_type,
             description: editFormData.description,
             location: editFormData.location,
-            image_url: data.data?.image_url || originalVisit.image_url,
-            image_filename: data.data?.image_filename || originalVisit.image_filename,
+            date: editFormData.visit_date, // CHANGED: update date field
+            // If image was removed, set image_url to null
+            image_url: isImageRemoved ? null : (data.data?.image_url || originalVisit.image_url),
+            image_filename: isImageRemoved ? "" : (data.data?.image_filename || originalVisit.image_filename),
           };
           
           setSalesVisitsData((prev) =>
@@ -301,6 +374,7 @@ function SalesVisits() {
           setEditingVisitId(null);
           setImageFile(null);
           setImagePreview(null);
+          setIsImageRemoved(false);
           alert(`Sales visit for ${updatedVisit.retailer_name} updated successfully!`);
         } else {
           alert(data.error || "Failed to update sales visit");
@@ -393,8 +467,15 @@ function SalesVisits() {
                     <label>Staff Name</label>
                     <input type="text" value={visit.staff_name} disabled className="edit-input" />
                     
-                    <label>Created At</label>
-                    <input type="text" value={new Date(visit.created_at).toLocaleDateString("en-GB")} disabled className="edit-input" />
+                    <label>Visit Date *</label>
+                    <input
+                      type="date"
+                      name="visit_date"
+                      value={editFormData.visit_date || formatDateForInput(visit.date)}
+                      onChange={handleInputChange}
+                      className="edit-input"
+                      required
+                    />
                     
                     <label>Retailer</label>
                     <select
@@ -479,6 +560,7 @@ function SalesVisits() {
                         onChange={handleInputChange}
                         placeholder="Enter location"
                         className="edit-input location-input"
+                        disabled={gettingLocation}
                       />
                       <button
                         type="button"
@@ -487,7 +569,7 @@ function SalesVisits() {
                         title="Get current location"
                         disabled={gettingLocation}
                       >
-                        {gettingLocation ? "Getting..." : <FaMapMarkerAlt />}
+                        {gettingLocation ? <FaSpinner className="spinner-mobile" /> : <FaMapMarkerAlt />}
                       </button>
                     </div>
 
@@ -506,8 +588,8 @@ function SalesVisits() {
                         {imageFile ? "Change Image" : "Choose Image"}
                       </label>
                       
-                      {/* Image Preview */}
-                      {(imagePreview || visit.image_url) && (
+                      {/* Current/Preview Image - Show only if image exists AND not removed */}
+                      {!isImageRemoved && (imagePreview || visit.image_url) && (
                         <div className="image-preview-mobile">
                           <img 
                             src={imagePreview || visit.image_url} 
@@ -518,7 +600,7 @@ function SalesVisits() {
                             <button
                               type="button"
                               className="view-image-btn-mobile"
-                              onClick={() => handleViewImage(imagePreview || visit.image_url)}
+                              onClick={() => openImageModal(imagePreview || visit.image_url, visit.retailer_name)}
                             >
                               <MdImage /> View
                             </button>
@@ -532,7 +614,25 @@ function SalesVisits() {
                           </div>
                         </div>
                       )}
-                      <p className="image-hint-mobile">Max file size: 5MB</p>
+                      
+                      {/* Show message when image is removed */}
+                      {isImageRemoved && (
+                        <div className="image-preview-mobile" style={{ border: '2px dashed #fc8181', background: '#fff5f5' }}>
+                          <p style={{ color: '#e53e3e', margin: '10px 0', textAlign: 'center' }}>
+                            <strong>Image will be removed</strong>
+                          </p>
+                          <button
+                            type="button"
+                            className="upload-btn-mobile"
+                            onClick={() => document.getElementById(`imageUpload-${visit.id}`).click()}
+                            style={{ background: '#4299e1', marginBottom: '0' }}
+                          >
+                            <MdImage /> Upload New Image
+                          </button>
+                        </div>
+                      )}
+                      
+                      <p className="image-hint-mobile">Max file size: 5MB. Click Remove to delete existing image</p>
                     </div>
 
                     {/* Description */}
@@ -551,6 +651,7 @@ function SalesVisits() {
                         setEditingVisitId(null);
                         setImageFile(null);
                         setImagePreview(null);
+                        setIsImageRemoved(false);
                       }}>Cancel</button>
                       <button className="update-btn" onClick={() => handleUpdateVisit(visit.id)}>Update</button>
                     </div>
@@ -567,7 +668,10 @@ function SalesVisits() {
                     <div className="visit-details">
                       <div className="detail-row">
                         <span className="detail-label">Date & Type:</span>
-                        <span className="detail-value">{new Date(visit.created_at).toLocaleDateString("en-GB")} • {visit.visit_type}</span>
+                        <span className="detail-value">
+                        {visit.date ? formatDateForDisplay(visit.date) : ""} • {visit.visit_type}
+
+                        </span>
                       </div>
                       <div className="detail-row">
                         <span className="detail-label">Sales Amount:</span>
@@ -605,19 +709,19 @@ function SalesVisits() {
                         </div>
                       )}
                       
-                      {/* Image Display */}
+                      {/* Image Display - Using Modal instead of new tab */}
                       {visit.image_url && (
                         <div className="detail-row">
                           <span className="detail-label">Image:</span>
                           <div className="image-display-mobile">
                             <div 
                               className="image-thumbnail-mobile"
-                              onClick={() => handleViewImage(visit.image_url)}
-                              title="View image"
+                              onClick={() => openImageModal(visit.image_url, visit.retailer_name)}
+                              title="Click to view image"
                             >
                               <img 
                                 src={visit.image_url} 
-                                alt="Visit" 
+                                alt={`Visit for ${visit.retailer_name}`} 
                                 className="thumbnail-image-mobile"
                                 onError={(e) => {
                                   e.target.style.display = 'none';
@@ -656,6 +760,23 @@ function SalesVisits() {
           )}
         </div>
       </div>
+
+      {/* Image Modal */}
+      {isModalOpen && (
+        <div className="image-modal-overlay" onClick={closeImageModal}>
+          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="image-modal-close" onClick={closeImageModal}>
+              <FaTimes />
+            </button>
+            <img 
+              src={modalImageUrl} 
+              alt={modalImageAlt} 
+              className="image-modal-image"
+            />
+            <p className="image-modal-caption">{modalImageAlt}</p>
+          </div>
+        </div>
+      )}
     </StaffMobileLayout>
   );
 }

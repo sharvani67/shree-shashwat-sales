@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import StaffMobileLayout from "../../Staff/StaffPages/StaffMobileLayout/StaffMobileLayout";
 import "./StaffInventory.css";
-
+import { baseurl } from "../../../BaseURL/BaseURL";
 function StaffInventory() {
   const user = JSON.parse(localStorage.getItem("user"));
   const staffName = user?.name || "Staff Member";
@@ -20,7 +20,7 @@ function StaffInventory() {
       try {
         setLoading(true);
 
-        const res = await fetch("http://localhost:5000/api/inventory");
+        const res = await fetch(`${baseurl}/api/inventory`);
         if (!res.ok) throw new Error("Failed to fetch inventory");
 
         const json = await res.json();
