@@ -162,7 +162,7 @@ function Checkout() {
         customer_name: customerName || retailerDetails?.name || "Customer",
         // Add retailer_mobile field - using mobileNumber from props or retailerDetails
         retailer_mobile: mobileNumber || retailerDetails?.mobile_number || "",
-        order_total: orderTotals.totalCustomerSalePrice,
+   order_total: orderTotals.totalCustomerSalePrice || 0,
         discount_amount: orderTotals.totalDiscount,
         taxable_amount: orderTotals.totalTaxableAmount,
         tax_amount: orderTotals.totalTax,
@@ -171,7 +171,7 @@ function Checkout() {
         estimated_delivery_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
         order_placed_by: actualStaffId,
         order_mode: orderMode,
-        approval_status: "Pending",
+        approval_status: "Approved",
         ordered_by: staffName,
         order_status: "Pending",
         staffid: actualStaffId,
