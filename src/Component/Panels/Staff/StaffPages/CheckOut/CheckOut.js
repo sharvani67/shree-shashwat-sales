@@ -160,14 +160,13 @@ function Checkout() {
         order_number: orderNumber,
         customer_id: retailerId,
         customer_name: customerName || retailerDetails?.name || "Customer",
-        // Add retailer_mobile field - using mobileNumber from props or retailerDetails
         retailer_mobile: mobileNumber || retailerDetails?.mobile_number || "",
    order_total: orderTotals.totalCustomerSalePrice || 0,
         discount_amount: orderTotals.totalDiscount,
         taxable_amount: orderTotals.totalTaxableAmount,
         tax_amount: orderTotals.totalTax,
         net_payable: orderTotals.finalTotal,
-        credit_period: totalCreditCharges, // This should be the total credit charges amount
+        credit_period: totalCreditCharges, 
         estimated_delivery_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
         order_placed_by: actualStaffId,
         order_mode: orderMode,
