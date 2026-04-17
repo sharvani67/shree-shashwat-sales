@@ -18,11 +18,15 @@ function PlaceSalesOrder() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   
+  // State for quantity inputs for each product
+  const [quantities, setQuantities] = useState({});
+  const [pendingQuantities, setPendingQuantities] = useState({});
+  
   const retailerId = location.state?.retailerId;
-  const retailerDiscount = parseFloat(location.state?.retailerDiscount) || 0; // Changed from discount to retailerDiscount
+  const retailerDiscount = parseFloat(location.state?.retailerDiscount) || 0;
   const customerName = location.state?.customerName || "";
   const retailermail = location.state?.retailermail || "";
-
+  
   // Get logged-in user
   const storedData = localStorage.getItem("user");
   const user = storedData ? JSON.parse(storedData) : null;
@@ -44,7 +48,6 @@ function PlaceSalesOrder() {
         
         const data = await response.json();
         
-        // Map the API response to match your Category type
         const mappedCategories = data.map((category) => ({
           id: category.id.toString(),
           name: category.category_name,
@@ -65,7 +68,6 @@ function PlaceSalesOrder() {
     fetchCategories();
   }, []);
 
-  // Helper function to assign icons based on category names
   const getCategoryIcon = (categoryName) => {
     const iconMap = {
       'Home Accessories': '🏠',
@@ -82,7 +84,7 @@ function PlaceSalesOrder() {
       'Beverages': '☕',
     };
     
-    return iconMap[categoryName] || '📦'; // Default icon
+    return iconMap[categoryName] || '📦';
   };
 
   // Fetch cart items on load
@@ -124,7 +126,6 @@ function PlaceSalesOrder() {
         if (result.success && Array.isArray(result.data)) {
           const retailer = result.data.find(r => r.id === parseInt(retailerId));
           if (retailer) {
-            // Use retailerDiscount from props first, otherwise use from API
             const discountToUse = retailerDiscount > 0 ? retailerDiscount : (parseFloat(retailer.discount) || 0);
             setRetailerInfo({
               name: retailer.name,
@@ -138,7 +139,6 @@ function PlaceSalesOrder() {
         }
       } catch (err) {
         console.error("Error fetching retailer info:", err);
-        // Fallback to state data
         setRetailerInfo({
           name: customerName,
           email: retailermail,
@@ -151,7 +151,6 @@ function PlaceSalesOrder() {
     if (staffId) {
       fetchRetailerInfo();
     } else {
-      // Fallback to state data
       setRetailerInfo({
         name: customerName,
         email: retailermail,
@@ -192,62 +191,109 @@ function PlaceSalesOrder() {
 
     fetchSalesProducts();
   }, []);
+const filteredProducts = products.filter(product => {
+  const productQuantity = parseFloat(product.quantity) || 0;
+  
+  if (productQuantity <= 0) {
+    return false;
+  }
+  
+  const matchesCategory = selectedCategory === 'all' || 
+    (product.category_id && product.category_id.toString() === selectedCategory) ||
+    (product.category && product.category.toLowerCase() === categoriesList.find(cat => cat.id === selectedCategory)?.name?.toLowerCase());
+  
+  if (!searchTerm.trim()) return matchesCategory;
+  
+  const query = searchTerm.toLowerCase().trim();
+  const matchesSearch = 
+    product.name?.toLowerCase().includes(query) ||
+    product.category?.toLowerCase().includes(query) ||
+    product.supplier?.toLowerCase().includes(query);
+  
+  return matchesCategory && matchesSearch;
+});
 
-  // Filter products based on search AND category
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || 
-      (product.category_id && product.category_id.toString() === selectedCategory) ||
-      (product.category && product.category.toLowerCase() === categoriesList.find(cat => cat.id === selectedCategory)?.name?.toLowerCase());
-    
-    if (!searchTerm.trim()) return matchesCategory;
-    
-    const query = searchTerm.toLowerCase().trim();
-    const matchesSearch = 
-      product.name?.toLowerCase().includes(query) ||
-      product.category?.toLowerCase().includes(query) ||
-      product.supplier?.toLowerCase().includes(query);
-    
-    return matchesCategory && matchesSearch;
-  });
+  // Initialize quantity for a product when it's first interacted with
+  const getProductQuantity = (productId) => {
+    return quantities[productId] || 1;
+  };
 
-  // Add product to cart via backend
+  // Update quantity for a product
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: newQuantity
+    }));
+  };
+
+  // Handle manual quantity input change
+  const handleManualQuantityChange = (productId, value) => {
+    const newValue = parseInt(value);
+    if (!isNaN(newValue) && newValue >= 1) {
+      updateQuantity(productId, newValue);
+    } else if (value === '') {
+      // Allow empty input temporarily
+      setPendingQuantities(prev => ({ ...prev, [productId]: '' }));
+    }
+  };
+
+  // Handle blur on manual input
+  const handleQuantityBlur = (productId) => {
+    const pendingValue = pendingQuantities[productId];
+    if (pendingValue !== undefined) {
+      const numValue = parseInt(pendingValue);
+      if (!isNaN(numValue) && numValue >= 1) {
+        updateQuantity(productId, numValue);
+      } else {
+        // Reset to current quantity if invalid
+        updateQuantity(productId, quantities[productId] || 1);
+      }
+      setPendingQuantities(prev => {
+        const newState = { ...prev };
+        delete newState[productId];
+        return newState;
+      });
+    }
+  };
+
+  // Add product to cart with specified quantity
   const addToCart = async (product) => {
+    const quantityToAdd = getProductQuantity(product.id);
+    
     try {
       // First check if product is already in cart
       const existingItem = cart.find(item => item.product_id === product.id);
       
-      // Get logged-in user info
       const storedData = localStorage.getItem("user");
       const user = storedData ? JSON.parse(storedData) : null;
       
-      // Format price to ensure it's a number
       const productPrice = parseFloat(product.price) || 0;
       
       if (existingItem) {
-        // Update quantity
+        // Update quantity by adding the selected quantity
         const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${existingItem.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ 
-            quantity: existingItem.quantity + 1 
+            quantity: existingItem.quantity + quantityToAdd 
           }),
         });
 
         if (!response.ok) throw new Error("Failed to update quantity");
       } else {
-        // Add new item with price
+        // Add new item with selected quantity
         const requestBody = {
           customer_id: retailerId,
           product_id: product.id,
-          quantity: 1,
-          price: productPrice,  // Add the product price here
-          credit_period: 0, // Default no credit period
-          credit_percentage: 0 // Default no credit percentage
+          quantity: quantityToAdd,
+          price: productPrice,
+          credit_period: 0,
+          credit_percentage: 0
         };
         
-        // Add staff_id if the user is a staff member
         if (user?.role === 'staff') {
           requestBody.staff_id = user.id;
         }
@@ -266,10 +312,22 @@ function PlaceSalesOrder() {
         }
       }
 
+      // Reset quantity for this product to 1 after adding
+      setQuantities(prev => ({
+        ...prev,
+        [product.id]: 1
+      }));
+
       // Refresh cart from backend
       const cartResponse = await fetch(`${baseurl}/api/cart/customer-cart/${retailerId}`);
       const refreshedCart = await cartResponse.json();
       setCart(refreshedCart || []);
+
+      // Optional: Show success feedback
+      const successMessage = quantityToAdd > 1 
+        ? `${quantityToAdd} × ${product.name} added to cart` 
+        : `${product.name} added to cart`;
+      console.log(successMessage);
 
     } catch (err) {
       console.error("Error adding to cart:", err);
@@ -331,7 +389,7 @@ function PlaceSalesOrder() {
               to="/staff/cart" 
               state={{ 
                 retailerId, 
-                retailerDiscount: retailerDiscount, // Pass retailerDiscount here
+                retailerDiscount: retailerDiscount,
                 customerName: retailerInfo.name || customerName,
                 retailermail: retailerInfo.email || retailermail
               }}
@@ -465,29 +523,68 @@ function PlaceSalesOrder() {
                 </div>
               )}
               
-              {!loading && filteredProducts.map(product => (
-                <div key={product.id} className="staff-product-card">
-                  <div className="staff-product-info">
-                    <h3>{product.name}</h3>
-                    <p className="staff-product-category">{product.category}</p>
-                    <p className="staff-product-price">₹{parseFloat(product.price).toLocaleString()} / {product.unit}</p>
-                    <div className="product-stock-info">
-                      <p className="staff-product-gst">GST: {product.gst_rate}%</p>
-                      {product.balance_stock && (
-                        <p className="stock-indicator">
-                          Stock: {product.balance_stock}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    className="staff-add-to-cart-btn"
-                    onClick={() => addToCart(product)}
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+              {!loading && filteredProducts.map(product => {
+  const currentQuantity = getProductQuantity(product.id);
+  const pendingValue = pendingQuantities[product.id];
+  const displayValue = pendingValue !== undefined ? pendingValue : currentQuantity;
+  
+  return (
+    <div key={product.id} className="staff-product-card">
+      <div className="staff-product-info">
+        <h3>{product.name}</h3>
+        <p className="staff-product-category">{product.category}</p>
+        <p className="staff-product-price">₹{parseFloat(product.price).toLocaleString()} / {product.unit}</p>
+        <p className="staff-product-gst">Stock: {product.quantity}</p>
+
+        <div className="product-stock-info">
+          <p className="staff-product-gst">GST: {product.gst_rate}%</p>
+          {product.balance_stock && (
+            <p className="stock-indicator">
+              Stock: {product.balance_stock}
+            </p>
+          )}
+        </div>
+      </div>
+      
+      {/* Horizontal Quantity Controls */}
+      <div className="product-actions-horizontal">
+        <div className="quantity-selector-horizontal">
+          <button
+            className="qty-btn-horizontal"
+            onClick={() => updateQuantity(product.id, currentQuantity - 1)}
+            disabled={currentQuantity <= 1}
+          >
+            −
+          </button>
+          
+          <input
+            type="number"
+            value={displayValue}
+            onChange={(e) => handleManualQuantityChange(product.id, e.target.value)}
+            onBlur={() => handleQuantityBlur(product.id)}
+            className="quantity-input-horizontal"
+            min="1"
+            step="1"
+          />
+          
+          <button
+            className="qty-btn-horizontal"
+            onClick={() => updateQuantity(product.id, currentQuantity + 1)}
+          >
+            +
+          </button>
+        </div>
+        
+        <button
+          className="staff-add-to-cart-btn-horizontal"
+          onClick={() => addToCart(product)}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+})}
             </div>
           </div>
         </div>

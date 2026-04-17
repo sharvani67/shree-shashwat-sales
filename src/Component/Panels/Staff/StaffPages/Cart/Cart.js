@@ -968,35 +968,50 @@ function CartPage() {
                       </div>
                     </div>
 
-                    {/* Quantity Controls */}
-                    <div className="item-controls">
-                      <div className="quantity-controls">
-                        <button
-                          onClick={() => updateQuantityInCart(item.id, Math.max(1, (item.quantity || 1) - 1))}
-                          className="qty-btn"
-                        >
-                          -
-                        </button>
-                        <span className="quantity-value">{item.quantity || 1}</span>
-                        <button
-                          onClick={() => updateQuantityInCart(item.id, (item.quantity || 1) + 1)}
-                          className="qty-btn"
-                        >
-                          +
-                        </button>
-                      </div>
+                 {/* Quantity Controls with Manual Input */}
+<div className="item-controls">
+  <div className="quantity-controls">
+    <button
+      onClick={() => updateQuantityInCart(item.id, Math.max(1, (item.quantity || 1) - 1))}
+      className="qty-btn"
+    >
+      -
+    </button>
+    
+    {/* Manual quantity input */}
+    <input
+      type="number"
+      value={item.quantity || 1}
+      onChange={(e) => {
+        const newValue = parseInt(e.target.value);
+        if (!isNaN(newValue) && newValue >= 1) {
+          updateQuantityInCart(item.id, newValue);
+        }
+      }}
+      className="quantity-input-manual"
+      min="1"
+      step="1"
+    />
+    
+    <button
+      onClick={() => updateQuantityInCart(item.id, (item.quantity || 1) + 1)}
+      className="qty-btn"
+    >
+      +
+    </button>
+  </div>
 
-                      <div className="per-unit-price">
-                        ₹{(breakdown.final_amount).toFixed(2)} per unit
-                      </div>
+  <div className="per-unit-price">
+    ₹{(breakdown.final_amount).toFixed(2)} per unit
+  </div>
 
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="remove-btn"
-                      >
-                        Remove
-                      </button>
-                    </div>
+  <button
+    onClick={() => removeFromCart(item.id)}
+    className="remove-btn"
+  >
+    Remove
+  </button>
+</div>
                   </div>
                 );
               })}
