@@ -184,39 +184,13 @@ function Login() {
         <div className="floating-rect rect-2"></div>
       </div>
 
-      {/* Left Side - Branding */}
-      <div className="login-branding">
-        <div className="brand-logo">
-          <FaStore />
-        </div>
-        <h1 className="brand-title">RetailSync</h1>
-        <p className="brand-subtitle">Sales & Retail Management Platform</p>
-
-        <div className="features-list">
-          <div className="feature-item">
-            <span className="feature-icon">📊</span>
-            <span>Real-time Analytics</span>
-          </div>
-          <div className="feature-item">
-            <span className="feature-icon">📈</span>
-            <span>Sales Tracking</span>
-          </div>
-          <div className="feature-item">
-            <span className="feature-icon">🛒</span>
-            <span>Inventory Management</span>
-          </div>
-          <div className="feature-item">
-            <span className="feature-icon">👥</span>
-            <span>Customer Insights</span>
-          </div>
-        </div>
-      </div>
-
+   
       {/* Right Side - Login Form */}
       <div className="login-wrapper">
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-header">
-            <h2>Welcome Back! 👋</h2>
+            <h2>Welcome Back! </h2>
+             
           </div>
 
           {/* Error Message */}
