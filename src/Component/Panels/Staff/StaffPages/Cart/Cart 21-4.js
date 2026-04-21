@@ -13,7 +13,7 @@ function CartPage() {
   const [error, setError] = useState(null);
   const [customerName, setCustomerName] = useState("");
   const [retailerId, setRetailerId] = useState("");
-  const [retailerDiscount, setRetailerDiscount] = useState(0);
+  const [retailerDiscount, setRetailerDiscount] = useState(0); // Changed from discount to retailerDiscount
   const [retailermail, setMail] = useState("");
   const [staffId, setStaffId] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -25,9 +25,6 @@ function CartPage() {
   const [categoryDiscounts, setCategoryDiscounts] = useState({});
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [retailerInfo, setRetailerInfo] = useState({});
-  
-  // NEW: Local quantities state for manual input
-  const [localQuantities, setLocalQuantities] = useState({});
 
   // Get logged-in user
   useEffect(() => {
@@ -37,12 +34,13 @@ function CartPage() {
     setUserRole(user?.role || "");
   }, []);
 
-  // Get retailer info from location state
+  // Get retailer info from location state - FIXED TO GET retailerDiscount
   useEffect(() => {
     if (location.state) {
       setRetailerId(location.state.retailerId || "");
       setCustomerName(location.state.customerName || "");
       
+      // IMPORTANT: Get retailerDiscount from location.state.retailerDiscount
       const receivedRetailerDiscount = parseFloat(location.state.retailerDiscount) || 0;
       setRetailerDiscount(receivedRetailerDiscount);
       
@@ -70,6 +68,7 @@ function CartPage() {
         if (result.success && Array.isArray(result.data)) {
           const retailer = result.data.find(r => r.id === parseInt(retailerId));
           if (retailer) {
+            // Use the retailerDiscount from location state first, otherwise use from API
             const retailerDiscountFromAPI = parseFloat(retailer.discount) || 0;
             const discountToUse = retailerDiscount > 0 ? retailerDiscount : retailerDiscountFromAPI;
             
@@ -79,6 +78,7 @@ function CartPage() {
               discount: discountToUse,
             });
             
+            // Update retailer discount if different
             if (discountToUse !== retailerDiscount) {
               setRetailerDiscount(discountToUse);
             }
@@ -88,6 +88,7 @@ function CartPage() {
         }
       } catch (err) {
         console.error("Error fetching retailer info:", err);
+        // Fallback to state data
         setRetailerInfo({
           name: customerName,
           email: retailermail,
@@ -112,10 +113,13 @@ function CartPage() {
         
         const categories = await response.json();
         
+        // Create a map of category_id to discount percentage
         const discountMap = {};
         if (Array.isArray(categories)) {
           categories.forEach(category => {
+            // Only include categories with active discounts
             if (category.discount > 0) {
+              // Check if discount is still valid (discount_end_date)
               const currentDate = new Date();
               const endDate = category.discount_end_date ? new Date(category.discount_end_date) : null;
               
@@ -149,8 +153,10 @@ function CartPage() {
         
         const result = await response.json();
         const products = Array.isArray(result) ? result : (result.data || []);
+        // Create a map of product details
         const productMap = {};
         products.forEach(product => {
+          // Get category discount if available
           const categoryId = product.category_id;
           const categoryDiscount = categoryDiscounts[categoryId] || 0;
           
@@ -158,9 +164,9 @@ function CartPage() {
             name: product.name,
             unit: product.unit,
             gst_rate: parseFloat(product.gst_rate) || 0,
-            price: parseFloat(product.price) || 0,
-            net_price: parseFloat(product.net_price) || 0,
-            weight: product.weight || null,
+            price: parseFloat(product.price) || 0, // This is sale_price
+              net_price: parseFloat(product.net_price) || 0, // Add net_price
+          weight: product.weight || null, // Add weight
             mrp: parseFloat(product.mrp) || 0,
             inclusive_gst: product.inclusive_gst || "Exclusive",
             category_id: categoryId,
@@ -175,6 +181,7 @@ function CartPage() {
       }
     };
 
+    // Fetch product details when category discounts are loaded
     if (!loadingCategories) {
       fetchProductDetails();
     }
@@ -224,13 +231,6 @@ function CartPage() {
 
       const items = await response.json();
       setCartItems(items || []);
-      
-      // Initialize local quantities after fetching cart items
-      const newLocalQuantities = {};
-      items.forEach(item => {
-        newLocalQuantities[item.id] = String(item.quantity || 1);
-      });
-      setLocalQuantities(newLocalQuantities);
     } catch (err) {
       console.error("Error fetching cart items:", err);
       setError("Failed to load cart items");
@@ -245,90 +245,62 @@ function CartPage() {
     }
   }, [retailerId]);
 
-const updateQuantityInCart = async (itemId, newQuantity) => {
-  if (newQuantity < 1) newQuantity = 1;
-
-  // ✅ Update UI instantly
-  setCartItems(prev =>
-    prev.map(item =>
-      item.id === itemId ? { ...item, quantity: newQuantity } : item
-    )
-  );
-
-  setLocalQuantities(prev => ({ ...prev, [itemId]: String(newQuantity) }));
-
-  try {
-    const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${itemId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ quantity: newQuantity }),
-    });
-
-    if (!response.ok) throw new Error("Failed to update quantity");
-
-  } catch (err) {
-    console.error("Error updating quantity:", err);
-    alert("Failed to update quantity");
-
-    // 🔁 rollback if error
-    await fetchCartItems();
-  }
-};
-
-  // NEW: Handle manual quantity input change
-  const handleLocalQuantityChange = (itemId, value) => {
-    setLocalQuantities(prev => ({ ...prev, [itemId]: value }));
-  };
-
-  // NEW: Commit quantity after manual entry
-  const commitQuantity = async (itemId) => {
-    const raw = localQuantities[itemId];
-    const parsed = parseInt(raw);
-    const final = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+  // Update quantity in cart
+  const updateQuantityInCart = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
     
-    setLocalQuantities(prev => ({ ...prev, [itemId]: String(final) }));
-    await updateQuantityInCart(itemId, final);
+    try {
+      const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update quantity");
+      
+      // Refresh cart items
+      fetchCartItems();
+    } catch (err) {
+      console.error("Error updating quantity:", err);
+      alert("Failed to update quantity");
+    }
   };
 
-const updatePriceInCart = async (itemId, newPrice) => {
-  try {
-    const price = parseFloat(newPrice);
-    if (isNaN(price) || price < 0) {
-      alert("Please enter a valid price");
+  // Update edited_sale_price in cart
+  const updatePriceInCart = async (itemId, newPrice) => {
+    try {
+      // Validate price
+      const price = parseFloat(newPrice);
+      if (isNaN(price) || price < 0) {
+        alert("Please enter a valid price");
+        return false;
+      }
+
+      const response = await fetch(`${baseurl}/api/cart/update-cart-price/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ price: price }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update price");
+      
+      // Exit edit mode
+      setEditingPriceForItem(null);
+      setEditedPrice("");
+      
+      // Refresh cart items
+      fetchCartItems();
+      return true;
+    } catch (err) {
+      console.error("Error updating price:", err);
+      alert(err.message || "Failed to update price");
       return false;
     }
-
-    // ✅ instant UI update
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === itemId ? { ...item, price } : item
-      )
-    );
-
-    const response = await fetch(`${baseurl}/api/cart/update-cart-price/${itemId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ price }),
-    });
-
-    if (!response.ok) throw new Error("Failed to update price");
-
-    setEditingPriceForItem(null);
-    setEditedPrice("");
-
-    return true;
-  } catch (err) {
-    console.error("Error updating price:", err);
-    alert(err.message || "Failed to update price");
-
-    await fetchCartItems(); // rollback
-    return false;
-  }
-};
+  };
 
   // Start editing price for an item
   const startEditingPrice = (itemId, currentPrice) => {
@@ -341,7 +313,7 @@ const updatePriceInCart = async (itemId, newPrice) => {
     setEditedPrice(e.target.value);
   };
 
-  // Handle price input blur
+  // Handle price input blur (save on click outside or enter)
   const handlePriceInputBlur = (itemId) => {
     if (editedPrice.trim() !== "") {
       updatePriceInCart(itemId, editedPrice);
@@ -351,7 +323,7 @@ const updatePriceInCart = async (itemId, newPrice) => {
     }
   };
 
-  // Handle price input key press
+  // Handle price input key press (save on Enter)
   const handlePriceInputKeyPress = (e, itemId) => {
     if (e.key === 'Enter') {
       if (editedPrice.trim() !== "") {
@@ -363,38 +335,30 @@ const updatePriceInCart = async (itemId, newPrice) => {
     }
   };
 
-const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) => {
+  // Update credit period for individual item
+  const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) => {
+    try {
+      const response = await fetch(`${baseurl}/api/cart/update-cart-credit/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          credit_period: creditPeriod,
+          credit_percentage: creditPercentage
+        }),
+      });
 
-  // ✅ instant UI update
-  setCartItems(prev =>
-    prev.map(item =>
-      item.id === itemId
-        ? { ...item, credit_period: creditPeriod, credit_percentage: creditPercentage }
-        : item
-    )
-  );
+      if (!response.ok) throw new Error("Failed to update credit period");
+      
+      // Refresh cart items
+      fetchCartItems();
+    } catch (err) {
+      console.error("Error updating credit period:", err);
+      alert("Failed to update credit period");
+    }
+  };
 
-  try {
-    const response = await fetch(`${baseurl}/api/cart/update-cart-credit/${itemId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        credit_period: creditPeriod,
-        credit_percentage: creditPercentage
-      }),
-    });
-
-    if (!response.ok) throw new Error("Failed to update credit period");
-
-  } catch (err) {
-    console.error("Error updating credit period:", err);
-    alert("Failed to update credit period");
-
-    await fetchCartItems(); // rollback
-  }
-};
   // Remove item from cart
   const removeFromCart = async (itemId) => {
     try {
@@ -404,36 +368,57 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
 
       if (!response.ok) throw new Error("Failed to remove item");
       
-      await fetchCartItems();
+      // Refresh cart items
+      fetchCartItems();
     } catch (err) {
       console.error("Error removing item:", err);
       alert("Failed to remove item");
     }
   };
 
-  // CALCULATION FUNCTIONS
+  // CALCULATION FUNCTIONS - Updated to match retailer modules logic
   const calculateItemBreakdown = (item) => {
     const product = productDetails[item.product_id] || {};
     
+    // Get MRP and sale prices
     const mrp = product.mrp || 0;
     const salePrice = product.price || 0;
+    
+    // Use edited_sale_price if available in cart item, otherwise from product details
     const editedSalePrice = parseFloat(item.price) || salePrice;
+    
     const gstRate = parseFloat(product.gst_rate) || 0;
     const isInclusiveGST = product.inclusive_gst === "Inclusive";
- const quantity = parseInt(localQuantities[item.id]) || item.quantity || 1;
+    const quantity = item.quantity || 1;
     const creditPercentage = item.credit_percentage || 0;
     const creditPeriod = item.credit_period || 0;
+    
+    // Get category discount percentage
     const categoryDiscountPercentage = product.category_discount || 0;
     
+    // Determine which discount to apply: category discount takes priority over retailer discount
     const applicableDiscountPercentage = categoryDiscountPercentage > 0 ? categoryDiscountPercentage : retailerDiscount;
     const discountType = categoryDiscountPercentage > 0 ? 'category' : (retailerDiscount > 0 ? 'retailer' : 'none');
 
+    console.log(`Staff - Product ${item.product_id} (${product.name}):`);
+    console.log(`- Category discount = ${categoryDiscountPercentage}%`);
+    console.log(`- Retailer discount = ${retailerDiscount}%`);
+    console.log(`- Applied discount = ${applicableDiscountPercentage}% (${discountType})`);
+
+    // Step 1: Calculate credit charge (percentage of edited_sale_price)
     const creditChargePerUnit = (editedSalePrice * creditPercentage) / 100;
+
+    // Step 2: Calculate price after credit charge
     const priceAfterCredit = editedSalePrice + creditChargePerUnit;
+
+    // Step 3: Apply applicable discount (either category or retailer, but not both)
     const discountAmountPerUnit = applicableDiscountPercentage > 0 ? (priceAfterCredit * applicableDiscountPercentage) / 100 : 0;
     const priceAfterDiscount = priceAfterCredit - discountAmountPerUnit;
+
+    // Step 4: Calculate item total (before tax)
     const itemTotalPerUnit = priceAfterDiscount;
 
+    // Step 5: Calculate tax (GST handling based on inclusive/exclusive)
     let taxableAmountPerUnit = 0;
     let taxAmountPerUnit = 0;
 
@@ -445,12 +430,16 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
       taxAmountPerUnit = (taxableAmountPerUnit * gstRate) / 100;
     }
 
+    // Calculate CGST/SGST (split equally)
     const sgstPercentage = gstRate / 2;
     const cgstPercentage = gstRate / 2;
     const sgstAmountPerUnit = taxAmountPerUnit / 2;
     const cgstAmountPerUnit = taxAmountPerUnit / 2;
+
+    // Calculate final amount per unit (including tax if exclusive)
     const finalAmountPerUnit = isInclusiveGST ? itemTotalPerUnit : itemTotalPerUnit + taxAmountPerUnit;
 
+    // Calculate totals for the quantity
     const totalMRP = mrp * quantity;
     const totalSalePrice = salePrice * quantity;
     const totalEditedSalePrice = editedSalePrice * quantity;
@@ -464,6 +453,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
     const finalPayableAmount = finalAmountPerUnit * quantity;
 
     return {
+      // Per unit values
       mrp,
       sale_price: salePrice,
       edited_sale_price: editedSalePrice,
@@ -485,8 +475,12 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
       cgst_amount: cgstAmountPerUnit,
       final_amount: finalAmountPerUnit,
       total_amount: finalAmountPerUnit * quantity,
+      
+      // For display purposes
       isInclusiveGST,
       quantity,
+      
+      // Totals for the entire quantity
       totals: {
         totalMRP,
         totalSalePrice,
@@ -524,6 +518,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
       subtotal += breakdown.totals.totalEditedSalePrice;
       totalCreditCharges += breakdown.totals.totalCreditCharge;
       
+      // Separate category and retailer discounts for display
       if (breakdown.discount_type === 'category') {
         totalCategoryDiscounts += breakdown.totals.totalDiscountAmount;
       } else if (breakdown.discount_type === 'retailer') {
@@ -564,7 +559,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
     navigate("/staff/place-sales-order", {
       state: {
         retailerId,
-        retailerDiscount: retailerDiscount,
+        retailerDiscount: retailerDiscount, // Pass retailerDiscount back
         customerName: retailerInfo.name || customerName,
         retailermail: retailerInfo.email || retailermail
       }
@@ -582,6 +577,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
       const breakdown = calculateItemBreakdown(item);
       const product = productDetails[item.product_id] || {};
       
+      // Create comprehensive breakdown object
       const breakdownObj = {
         perUnit: {
           mrp: breakdown.mrp,
@@ -607,6 +603,8 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
           total_amount: breakdown.total_amount,
           isInclusiveGST: breakdown.isInclusiveGST
         },
+        
+        // Totals for the quantity
         totals: {
           totalMRP: breakdown.totals.totalMRP,
           totalSalePrice: breakdown.totals.totalSalePrice,
@@ -620,21 +618,28 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
           totalCgstAmount: breakdown.totals.totalCgstAmount,
           finalPayableAmount: breakdown.totals.finalPayableAmount
         },
+        
+        // Quantity
         quantity: breakdown.quantity
       };
 
       return {
+        // Original cart item fields
         id: item.id,
         product_id: item.product_id,
         quantity: item.quantity || 1,
         price: item.price || breakdown.edited_sale_price,
         credit_period: item.credit_period || 0,
         credit_percentage: item.credit_percentage || 0,
+        
+        // Additional fields needed for checkout
         item_name: product.name || `Product ${item.product_id}`,
         product_details: product,
         breakdown: breakdownObj,
-        net_price: product.net_price || 0,
-        weight: product.weight || null
+
+              net_price: product.net_price || 0,
+      weight: product.weight || null
+
       };
     });
 
@@ -643,7 +648,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
         retailerId,
         customerName: retailerInfo.name || customerName,
         retailermail: retailerInfo.email || retailermail,
-        retailerDiscount: retailerDiscount,
+        retailerDiscount: retailerDiscount, // Pass retailerDiscount forward
         cartItems: checkoutItems,
         staffId: userRole === 'staff' ? staffId : null,
         userRole,
@@ -694,6 +699,10 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
     }
     return "No Discount";
   };
+
+  // Debug info
+  console.log("Staff CartPage - Current retailer discount:", retailerDiscount);
+  console.log("Staff CartPage - Cart items count:", cartItems.length);
 
   if (!retailerId) {
     return (
@@ -792,7 +801,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
           </div>
         )}
 
-        {/* Cart Items with Manual Quantity Input */}
+        {/* Cart Items with Credit Period Selection and Price Editing */}
         {!loading && !loadingCategories && cartItems.length > 0 && (
           <div className="cart-items-container">
             <h2>Cart Items ({cartItems.length})</h2>
@@ -809,7 +818,6 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
                 const breakdown = calculateItemBreakdown(item);
                 const product = productDetails[item.product_id] || {};
                 const finalPayableAmount = breakdown.totals.finalPayableAmount;
-                const currentQuantity = localQuantities[item.id] ?? String(item.quantity || 1);
                 
                 return (
                   <div key={item.id} className="cart-item-card">
@@ -820,7 +828,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
                           {getDiscountBadge(item)}
                         </div>
                         
-                        {/* Edited Sale Price Display/Edit */}
+                        {/* Edited Sale Price Display/Edit - Click to edit */}
                         <div className="price-edit-container">
                           {editingPriceForItem === item.id ? (
                             <input
@@ -915,6 +923,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
 
                       {/* Item Calculation Breakdown */}
                       <div className="calculation-breakdown">
+                        {/* Credit Charge */}
                         {breakdown.credit_charge > 0 && (
                           <div className="breakdown-row credit-charge">
                             <span>Credit Charge ({breakdown.credit_percentage}%):</span>
@@ -922,6 +931,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
                           </div>
                         )}
                         
+                        {/* Discount */}
                         {breakdown.applicable_discount_percentage > 0 && (
                           <div className={`breakdown-row ${breakdown.discount_type}-discount`}>
                             <span>{breakdown.discount_type === 'category' ? 'Category' : 'Retailer'} Discount ({breakdown.applicable_discount_percentage}%):</span>
@@ -929,11 +939,13 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
                           </div>
                         )}
                         
+                        {/* Taxable Amount */}
                         <div className="breakdown-row taxable">
                           <span>Taxable Amount:</span>
                           <span>₹{breakdown.taxable_amount.toLocaleString('en-IN')}</span>
                         </div>
                         
+                        {/* GST */}
                         {breakdown.tax_amount > 0 && (
                           <div className="breakdown-row tax">
                             <span>GST ({breakdown.tax_percentage}%):</span>
@@ -941,6 +953,7 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
                           </div>
                         )}
                         
+                        {/* Final Amount */}
                         <div className="breakdown-row total">
                           <span>Final Amount:</span>
                           <span className="item-total-amount">
@@ -948,58 +961,57 @@ const updateItemCreditPeriod = async (itemId, creditPeriod, creditPercentage) =>
                           </span>
                         </div>
                         
+                        {/* Quantity Multiplier Note */}
                         <div className="breakdown-row-note">
                           × {breakdown.quantity} units = ₹{finalPayableAmount.toLocaleString('en-IN')} total
                         </div>
                       </div>
                     </div>
 
-                    {/* UPDATED: Quantity Controls with Manual Input */}
-                    <div className="item-controls">
-                      <div className="quantity-controls">
-                        <button
-                          onClick={() => updateQuantityInCart(item.id, (item.quantity || 1) - 1)}
-                          className="qty-btn"
-                          disabled={(item.quantity || 1) <= 1}
-                        >
-                          -
-                        </button>
-                        
-                        {/* Manual quantity input with local state */}
-                        <input
-                          type="number"
-                          value={currentQuantity}
-                          onChange={(e) => handleLocalQuantityChange(item.id, e.target.value)}
-                          onBlur={() => commitQuantity(item.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          className="quantity-input-manual"
-                          min="1"
-                          step="1"
-                        />
-                        
-                        <button
-                          onClick={() => updateQuantityInCart(item.id, (item.quantity || 1) + 1)}
-                          className="qty-btn"
-                        >
-                          +
-                        </button>
-                      </div>
+                 {/* Quantity Controls with Manual Input */}
+<div className="item-controls">
+  <div className="quantity-controls">
+    <button
+      onClick={() => updateQuantityInCart(item.id, Math.max(1, (item.quantity || 1) - 1))}
+      className="qty-btn"
+    >
+      -
+    </button>
+    
+    {/* Manual quantity input */}
+    <input
+      type="number"
+      value={item.quantity || 1}
+      onChange={(e) => {
+        const newValue = parseInt(e.target.value);
+        if (!isNaN(newValue) && newValue >= 1) {
+          updateQuantityInCart(item.id, newValue);
+        }
+      }}
+      className="quantity-input-manual"
+      min="1"
+      step="1"
+    />
+    
+    <button
+      onClick={() => updateQuantityInCart(item.id, (item.quantity || 1) + 1)}
+      className="qty-btn"
+    >
+      +
+    </button>
+  </div>
 
-                      <div className="per-unit-price">
-                        ₹{(breakdown.final_amount).toFixed(2)} per unit
-                      </div>
+  <div className="per-unit-price">
+    ₹{(breakdown.final_amount).toFixed(2)} per unit
+  </div>
 
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="remove-btn"
-                      >
-                        Remove
-                      </button>
-                    </div>
+  <button
+    onClick={() => removeFromCart(item.id)}
+    className="remove-btn"
+  >
+    Remove
+  </button>
+</div>
                   </div>
                 );
               })}

@@ -18,7 +18,7 @@ function PlaceSalesOrder() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   
-  // State for quantity inputs for each product - starts at 0
+  // State for quantity inputs for each product
   const [quantities, setQuantities] = useState({});
   const [pendingQuantities, setPendingQuantities] = useState({});
   
@@ -191,37 +191,36 @@ function PlaceSalesOrder() {
 
     fetchSalesProducts();
   }, []);
+const filteredProducts = products.filter(product => {
+  const productQuantity = parseFloat(product.quantity) || 0;
+  
+  if (productQuantity <= 0) {
+    return false;
+  }
+  
+  const matchesCategory = selectedCategory === 'all' || 
+    (product.category_id && product.category_id.toString() === selectedCategory) ||
+    (product.category && product.category.toLowerCase() === categoriesList.find(cat => cat.id === selectedCategory)?.name?.toLowerCase());
+  
+  if (!searchTerm.trim()) return matchesCategory;
+  
+  const query = searchTerm.toLowerCase().trim();
+  const matchesSearch = 
+    product.name?.toLowerCase().includes(query) ||
+    product.category?.toLowerCase().includes(query) ||
+    product.supplier?.toLowerCase().includes(query);
+  
+  return matchesCategory && matchesSearch;
+});
 
-  const filteredProducts = products.filter(product => {
-    const productQuantity = parseFloat(product.quantity) || 0;
-    
-    if (productQuantity <= 0) {
-      return false;
-    }
-    
-    const matchesCategory = selectedCategory === 'all' || 
-      (product.category_id && product.category_id.toString() === selectedCategory) ||
-      (product.category && product.category.toLowerCase() === categoriesList.find(cat => cat.id === selectedCategory)?.name?.toLowerCase());
-    
-    if (!searchTerm.trim()) return matchesCategory;
-    
-    const query = searchTerm.toLowerCase().trim();
-    const matchesSearch = 
-      product.name?.toLowerCase().includes(query) ||
-      product.category?.toLowerCase().includes(query) ||
-      product.supplier?.toLowerCase().includes(query);
-    
-    return matchesCategory && matchesSearch;
-  });
-
-  // Get product quantity - starts at 0
+  // Initialize quantity for a product when it's first interacted with
   const getProductQuantity = (productId) => {
-    return quantities[productId] || 0;
+    return quantities[productId] || 1;
   };
 
   // Update quantity for a product
   const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity < 0) return;
+    if (newQuantity < 1) return;
     setQuantities(prev => ({
       ...prev,
       [productId]: newQuantity
@@ -230,13 +229,12 @@ function PlaceSalesOrder() {
 
   // Handle manual quantity input change
   const handleManualQuantityChange = (productId, value) => {
-    if (value === '') {
+    const newValue = parseInt(value);
+    if (!isNaN(newValue) && newValue >= 1) {
+      updateQuantity(productId, newValue);
+    } else if (value === '') {
+      // Allow empty input temporarily
       setPendingQuantities(prev => ({ ...prev, [productId]: '' }));
-    } else {
-      const newValue = parseInt(value);
-      if (!isNaN(newValue) && newValue >= 0) {
-        updateQuantity(productId, newValue);
-      }
     }
   };
 
@@ -245,10 +243,11 @@ function PlaceSalesOrder() {
     const pendingValue = pendingQuantities[productId];
     if (pendingValue !== undefined) {
       const numValue = parseInt(pendingValue);
-      if (!isNaN(numValue) && numValue >= 0) {
+      if (!isNaN(numValue) && numValue >= 1) {
         updateQuantity(productId, numValue);
       } else {
-        updateQuantity(productId, quantities[productId] || 0);
+        // Reset to current quantity if invalid
+        updateQuantity(productId, quantities[productId] || 1);
       }
       setPendingQuantities(prev => {
         const newState = { ...prev };
@@ -262,16 +261,17 @@ function PlaceSalesOrder() {
   const addToCart = async (product) => {
     const quantityToAdd = getProductQuantity(product.id);
     
-    if (quantityToAdd === 0) {
-      alert("Please select at least 1 quantity");
-      return;
-    }
-    
     try {
+      // First check if product is already in cart
       const existingItem = cart.find(item => item.product_id === product.id);
+      
+      const storedData = localStorage.getItem("user");
+      const user = storedData ? JSON.parse(storedData) : null;
+      
       const productPrice = parseFloat(product.price) || 0;
       
       if (existingItem) {
+        // Update quantity by adding the selected quantity
         const response = await fetch(`${baseurl}/api/cart/update-cart-quantity/${existingItem.id}`, {
           method: "PUT",
           headers: {
@@ -284,6 +284,7 @@ function PlaceSalesOrder() {
 
         if (!response.ok) throw new Error("Failed to update quantity");
       } else {
+        // Add new item with selected quantity
         const requestBody = {
           customer_id: retailerId,
           product_id: product.id,
@@ -311,22 +312,22 @@ function PlaceSalesOrder() {
         }
       }
 
-      // Reset quantity to 0 after adding
+      // Reset quantity for this product to 1 after adding
       setQuantities(prev => ({
         ...prev,
-        [product.id]: 0
+        [product.id]: 1
       }));
 
-      // Refresh cart
+      // Refresh cart from backend
       const cartResponse = await fetch(`${baseurl}/api/cart/customer-cart/${retailerId}`);
       const refreshedCart = await cartResponse.json();
       setCart(refreshedCart || []);
 
-      // Success message
+      // Optional: Show success feedback
       const successMessage = quantityToAdd > 1 
         ? `${quantityToAdd} × ${product.name} added to cart` 
         : `${product.name} added to cart`;
-      alert(successMessage);
+      console.log(successMessage);
 
     } catch (err) {
       console.error("Error adding to cart:", err);
@@ -334,6 +335,7 @@ function PlaceSalesOrder() {
     }
   };
 
+  // Cart count
   const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
   if (!retailerId) {
@@ -382,7 +384,7 @@ function PlaceSalesOrder() {
               </div>
             </div>
             
-            {/* Cart Button */}
+            {/* Cart Button - Direct link to Cart Page */}
             <Link 
               to="/staff/cart" 
               state={{ 
@@ -454,6 +456,7 @@ function PlaceSalesOrder() {
             className="staff-search-input"
           />
           
+          {/* Search Results Summary */}
           {searchTerm && (
             <div className="search-results-summary">
               <div className="search-summary-content">
@@ -521,61 +524,67 @@ function PlaceSalesOrder() {
               )}
               
               {!loading && filteredProducts.map(product => {
-                const currentQuantity = getProductQuantity(product.id);
-                const pendingValue = pendingQuantities[product.id];
-                const displayValue = pendingValue !== undefined ? pendingValue : currentQuantity;
-                
-                return (
-                  <div key={product.id} className="staff-product-card">
-                    <div className="staff-product-info">
-                      <h3>{product.name}</h3>
-                      <p className="staff-product-category">{product.category}</p>
-                      <p className="staff-product-price">₹{parseFloat(product.price).toLocaleString()} / {product.unit}</p>
-                      
-                      <div className="product-stock-info">
-                        <p className="staff-product-gst">GST: {product.gst_rate}%</p>
-                        <p className="staff-product-gst flex-start">Stock: {product.quantity}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Quantity Controls */}
-                    <div className="product-actions-horizontal">
-                      <div className="quantity-selector-horizontal">
-                        <button
-                          className="qty-btn-horizontal"
-                          onClick={() => updateQuantity(product.id, currentQuantity - 1)}
-                          disabled={currentQuantity <= 0}
-                        >
-                          −
-                        </button>
-                        
-                        <input
-                          type="text"
-                          value={displayValue === 0 ? '' : displayValue}
-                          onChange={(e) => handleManualQuantityChange(product.id, e.target.value)}
-                          onBlur={() => handleQuantityBlur(product.id)}
-                          className="quantity-input-horizontal"
-                          placeholder="0"
-                        />
-                        
-                        <button
-                          className="qty-btn-horizontal"
-                          onClick={() => updateQuantity(product.id, currentQuantity + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                      
-                      <button
-                        className="staff-add-to-cart-btn-horizontal"
-                        onClick={() => addToCart(product)}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+  const currentQuantity = getProductQuantity(product.id);
+  const pendingValue = pendingQuantities[product.id];
+  const displayValue = pendingValue !== undefined ? pendingValue : currentQuantity;
+  
+  return (
+    <div key={product.id} className="staff-product-card">
+      <div className="staff-product-info">
+        <h3>{product.name}</h3>
+        <p className="staff-product-category">{product.category}</p>
+        <p className="staff-product-price">₹{parseFloat(product.price).toLocaleString()} / {product.unit}</p>
+        <p className="staff-product-gst">Stock: {product.quantity}</p>
+
+        <div className="product-stock-info">
+          <p className="staff-product-gst">GST: {product.gst_rate}%</p>
+          {product.balance_stock && (
+            <p className="stock-indicator">
+              Stock: {product.balance_stock}
+            </p>
+          )}
+        </div>
+      </div>
+      
+      {/* Horizontal Quantity Controls */}
+      <div className="product-actions-horizontal">
+        <div className="quantity-selector-horizontal">
+          <button
+            className="qty-btn-horizontal"
+            onClick={() => updateQuantity(product.id, currentQuantity - 1)}
+            disabled={currentQuantity <= 1}
+          >
+            −
+          </button>
+          
+          <input
+            type="number"
+            value={displayValue}
+            onChange={(e) => handleManualQuantityChange(product.id, e.target.value)}
+            onBlur={() => handleQuantityBlur(product.id)}
+            className="quantity-input-horizontal"
+            min="1"
+            step="1"
+          />
+          
+          <button
+            className="qty-btn-horizontal"
+            onClick={() => updateQuantity(product.id, currentQuantity + 1)}
+          >
+            +
+          </button>
+        </div>
+        
+        <button
+          className="staff-add-to-cart-btn-horizontal"
+          onClick={() => addToCart(product)}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+})}
             </div>
           </div>
         </div>
