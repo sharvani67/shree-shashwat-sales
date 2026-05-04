@@ -551,37 +551,52 @@ function MyRetailers() {
   const staffId = user?.id || null;
   const role = user?.role || null;
 
-  // Fetch retailers function
-  const fetchRetailers = () => {
-    if (!staffId || role !== "staff") return;
+const fetchRetailers = () => {
+  if (!staffId || role !== "Staff") return;
 
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    fetch(`${baseurl}/get-sales-retailers/${staffId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        return res.json();
-      })
-      .then((result) => {
-        console.log("API Response:", result);
-        
-        if (result.success) {
-          const retailersData = result.data || result.retailers || result.accounts || [];
-          console.log("Retailers data to set:", retailersData);
-          setRetailers(retailersData);
-        } else {
-          throw new Error(result.error || result.message || "Failed to fetch retailers");
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching retailers:", err);
-        setError("Failed to load retailers: " + err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  fetch(`${baseurl}/get-sales-retailers/${staffId}`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      return res.json();
+    })
+    .then((result) => {
+      console.log("API Response:", result);
+      
+      let retailersData = [];
+      
+      // Handle different response shapes
+      if (Array.isArray(result)) {
+        // Direct array response
+        retailersData = result;
+      } else if (result.success === true) {
+        // Success wrapper with data property
+        retailersData = result.data || result.retailers || result.accounts || [];
+      } else if (result.data && Array.isArray(result.data)) {
+        // result.data is array
+        retailersData = result.data;
+      } else if (result.retailers && Array.isArray(result.retailers)) {
+        retailersData = result.retailers;
+      } else if (result.accounts && Array.isArray(result.accounts)) {
+        retailersData = result.accounts;
+      } else {
+        // No recognizable structure
+        throw new Error(result.message || "Invalid response format");
+      }
+
+      console.log("Extracted retailers data:", retailersData);
+      setRetailers(retailersData);
+    })
+    .catch((err) => {
+      console.error("Error fetching retailers:", err);
+      setError("Failed to load retailers: " + err.message);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+};
 
   useEffect(() => {
     fetchRetailers();
